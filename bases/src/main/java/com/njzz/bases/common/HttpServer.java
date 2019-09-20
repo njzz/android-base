@@ -19,7 +19,11 @@ public class HttpServer {
             if(response!=null){
                 if(arg1==ErrorCode.CONNECT){
                     response.OnConnectError();
-                    LogUtils.d( "Server Connect Error!" );
+                    String strExt="";
+                    if(argObj instanceof  String){
+                        strExt=(String)argObj;
+                    }
+                    LogUtils.w( "Server Connect Error!" +strExt);
                 }else{
                     LogUtils.d( Utils.jsonFormat( (String)argObj) );
                     response.OnResult(arg1,(String)argObj);

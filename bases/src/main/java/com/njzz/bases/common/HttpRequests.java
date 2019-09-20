@@ -70,7 +70,7 @@ public class HttpRequests extends ResCompetition implements Notify.Normal {
     }
 
     private void OnRequest(DataU dateSet) {
-        String strData = "";
+        String strData = dateSet.strUrl;
         int code = ErrorCode.CONNECT;
         try {
             //全局参数增加

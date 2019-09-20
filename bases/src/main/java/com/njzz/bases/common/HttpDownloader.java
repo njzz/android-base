@@ -121,7 +121,7 @@ public class HttpDownloader extends ResCompetition implements Notify.Normal{
      * @param nn 通知器 [arg1 为 errorcode,argObj 为本地文件地址]
      */
     public static void add(String strUrl, String strPath, Notify.Normal nn){
-        LogUtils.d("add download task:"+strUrl);
+        //LogUtils.d("add download task:"+strUrl);
         httpDownloader.addTask(strUrl,strPath,nn);
     }
 }
