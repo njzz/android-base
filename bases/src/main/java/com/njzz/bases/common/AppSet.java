@@ -13,9 +13,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 public class AppSet extends Application {
+    private static Application application;
+    static public Application app(){ return application;}
     @Override
     public void onCreate() {
         super.onCreate();
+        application=this;
         ActManager.ins();//初始化管理器
         /*网络改变监听*/
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {

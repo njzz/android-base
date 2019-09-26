@@ -1,5 +1,6 @@
 package com.njzz.bases.common;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -16,6 +17,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.njzz.bases.R;
 import com.njzz.bases.utils.DensityUtils;
+import com.njzz.bases.utils.LogUtils;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -44,7 +46,7 @@ public class RecylerViewPlus extends RecyclerView {
     //尾控件
     private RefreshFeet mFooterView;
     //adapter的装饰类
-    private RVHeaderFooterWrapper mHeaderAndFooterWrapper;
+    private SpcialItemWrap mHeaderAndFooterWrapper;
 
     PagerSnapHelper mSnapHelper;//整屏滚动
     private int mInProcessing=PROCESS_NONE,mEnableSet;
@@ -52,22 +54,21 @@ public class RecylerViewPlus extends RecyclerView {
     private boolean mLoadmoreNotifyed;
 
     public RecylerViewPlus(Context context) {
-        this(context, null);
+        super(context);
     }
 
     public RecylerViewPlus(Context context, @Nullable AttributeSet attrs) {
-        this(context, attrs, 0);
+        super(context, attrs);
     }
     public RecylerViewPlus(Context context, @Nullable AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        //init(context);
     }
 
     //需要先设置适配器
     public void setOnRefreshListener(onRefreshListener n,int set){
         mListener =n;
         mEnableSet = set;
-        init(getContext());
+        init();
     }
 
     public void setPageScroll(boolean bSet){
@@ -95,8 +96,11 @@ public class RecylerViewPlus extends RecyclerView {
         return -1;
     }
 
-    private void init(Context context) {
-        if(mHeaderAndFooterWrapper!=null) {
+    private void init() {
+        Adapter adapter=getAdapter();
+        if(mHeaderAndFooterWrapper==null && adapter instanceof QuickAdapter) {
+            mHeaderAndFooterWrapper=new SpcialItemWrap();
+            ((QuickAdapter)adapter).setSpcial(mHeaderAndFooterWrapper);
             if ((mEnableSet & SET_REFRESH) != 0 && mHeaderView == null) {
                 //获取到头布局
                 mHeaderView = new RefreshHead(getContext());
@@ -119,14 +123,18 @@ public class RecylerViewPlus extends RecyclerView {
 
     @Override
     public void setAdapter(Adapter adapter) {
-        if(adapter instanceof RVHeaderFooterWrapper) {
-            mHeaderAndFooterWrapper = (RVHeaderFooterWrapper) adapter;
-            //mHeaderAndFooterWrapper.registerAdapterDataObserver(emptyObserver);//观察者模式
+        if(!(adapter instanceof  QuickAdapter)){
+            LogUtils.w("Adapter is not based on QuickAdapter!");
         }
         super.setAdapter(adapter);
     }
 
     //dispatchTouchEvent  是否分发  onInterceptTouchEvent 是否拦截  onTouchEvent 是否处理
+
+//    @Override
+//    public boolean dispatchTouchEvent(MotionEvent ev){
+//        return false;
+//    }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
@@ -218,21 +226,22 @@ public class RecylerViewPlus extends RecyclerView {
     }
 
     private boolean isFirstAllVisable(){
-        RecyclerView.LayoutManager lm= getLayoutManager();
-        if(lm!=null){
-            if(lm instanceof LinearLayoutManager ){//GridLayoutManager 从 LinearLayoutManager 派生
-                int posVAll= ((LinearLayoutManager)lm).findFirstCompletelyVisibleItemPosition();
-                return posVAll<=1;//第0个是刷新
-            }else if(lm instanceof StaggeredGridLayoutManager){
-                if(mStagSpinCount==null){
-                    mStagSpinCount=new int [((StaggeredGridLayoutManager) lm).getSpanCount()];
-                }
-                ((StaggeredGridLayoutManager)lm).findFirstCompletelyVisibleItemPositions(mStagSpinCount);
-                int minShow = findMin(mStagSpinCount);
-                return minShow<=1;
-            }
-        }
-        return true;
+        return !canScrollHorizontally(-1);
+//        RecyclerView.LayoutManager lm= getLayoutManager();
+//        if(lm!=null){
+//            if(lm instanceof LinearLayoutManager ){//GridLayoutManager 从 LinearLayoutManager 派生
+//                int posVAll= ((LinearLayoutManager)lm).findFirstCompletelyVisibleItemPosition();
+//                return posVAll<=1;//第0个是刷新
+//            }else if(lm instanceof StaggeredGridLayoutManager){
+//                if(mStagSpinCount==null){
+//                    mStagSpinCount=new int [((StaggeredGridLayoutManager) lm).getSpanCount()];
+//                }
+//                ((StaggeredGridLayoutManager)lm).findFirstCompletelyVisibleItemPositions(mStagSpinCount);
+//                int minShow = findMin(mStagSpinCount);
+//                return minShow<=1;
+//            }
+//        }
+//        return true;
     }
 
     private int findMin(int[] lastPositions) {
@@ -245,25 +254,27 @@ public class RecylerViewPlus extends RecyclerView {
     }
 
     private boolean isLastAllVisable(){
-        RecyclerView.LayoutManager lm= getLayoutManager();
-        if(lm!=null){
-            int total=mHeaderAndFooterWrapper.getItemCount();
-            if(total>0) {
-                if (lm instanceof LinearLayoutManager) {//GridLayoutManager 从 LinearLayoutManager 派生
-                    //int posVAll = ((LinearLayoutManager) lm).findLastCompletelyVisibleItemPosition();
-                    int posVAll=((LinearLayoutManager) lm).findLastVisibleItemPosition();
-                    return posVAll >= total - 2;//最后一个是加载更多
-                } else if (lm instanceof StaggeredGridLayoutManager) {
-                    if (mStagSpinCount == null) {
-                        mStagSpinCount = new int[((StaggeredGridLayoutManager) lm).getSpanCount()];
-                    }
-                    ((StaggeredGridLayoutManager) lm).findLastCompletelyVisibleItemPositions(mStagSpinCount);
-                    int maxShow = findMax(mStagSpinCount);
-                    return maxShow == total - 2;//最后是加载更多
-                }
-            }
-        }
-        return false;
+        return canScrollHorizontally(1);
+//        RecyclerView.LayoutManager lm= getLayoutManager();
+//        Adapter adapter=getAdapter();
+//        if(lm!=null && adapter!=null){
+//            int total=adapter.getItemCount();
+//            if(total>0) {
+//                if (lm instanceof LinearLayoutManager) {//GridLayoutManager 从 LinearLayoutManager 派生
+//                    //int posVAll = ((LinearLayoutManager) lm).findLastCompletelyVisibleItemPosition();
+//                    int posVAll=((LinearLayoutManager) lm).findLastVisibleItemPosition();
+//                    return posVAll >= total - 2;//最后一个是加载更多
+//                } else if (lm instanceof StaggeredGridLayoutManager) {
+//                    if (mStagSpinCount == null) {
+//                        mStagSpinCount = new int[((StaggeredGridLayoutManager) lm).getSpanCount()];
+//                    }
+//                    ((StaggeredGridLayoutManager) lm).findLastCompletelyVisibleItemPositions(mStagSpinCount);
+//                    int maxShow = findMax(mStagSpinCount);
+//                    return maxShow == total - 2;//最后是加载更多
+//                }
+//            }
+//        }
+//        return false;
     }
 
     private int findMax(int[] lastPositions) {
@@ -324,7 +335,7 @@ public class RecylerViewPlus extends RecyclerView {
         boolean mCanDoWorking;
         RefreshCtrl(Context context){
             View v = LayoutInflater.from(context).inflate(R.layout.recylerview_feet, null);
-            RecyclerView.LayoutParams lp=new RecyclerView.LayoutParams(MATCH_PARENT,WRAP_CONTENT);//预设一个LayoutParams，inflate 的时候没有parent ,不然如果是LinerLayoutManager 会是 WRAP_CONTENT,WRAP_CONTENT
+            RecyclerView.LayoutParams lp=new RecyclerView.LayoutParams(MATCH_PARENT,WRAP_CONTENT);//预设一个LayoutParams，inflate 的时候没有parent ,LinerLayoutManager 会是 WRAP_CONTENT,WRAP_CONTENT
             v.setLayoutParams(lp);
             mViewHeight=DensityUtils.dp2px(context,25f);
 
@@ -355,18 +366,18 @@ public class RecylerViewPlus extends RecyclerView {
 
         protected void attach(boolean bHead){
             if (bHead)
-                mHeaderAndFooterWrapper.addFirstView(vRootSet);
+                mHeaderAndFooterWrapper.setFirstView(vRootSet);
             else
-                mHeaderAndFooterWrapper.addLastView(vRootSet);
-            mHeaderAndFooterWrapper.notifyDataSetChanged();
+                mHeaderAndFooterWrapper.setLastView(vRootSet);
+            getAdapter().notifyDataSetChanged();
         }
 
         protected void detach(boolean bHead){
             if(bHead)
-                mHeaderAndFooterWrapper.removeHeadView(vRootSet);
+                mHeaderAndFooterWrapper.removeHeadView(vRootSet,true);
             else
-                mHeaderAndFooterWrapper.removeFootView(vRootSet);
-            mHeaderAndFooterWrapper.notifyDataSetChanged();
+                mHeaderAndFooterWrapper.removeFootView(vRootSet,true);
+            getAdapter().notifyDataSetChanged();
         }
 
         void showPulling(int offset){
@@ -407,7 +418,7 @@ public class RecylerViewPlus extends RecyclerView {
         void hide(){
             mInProcessing=PROCESS_NONE;
             mShowed=false;
-            setHeight(0);
+            setHeight(5);
         }
 
         void setHeight(int height){

@@ -3,6 +3,8 @@ package com.njzz.bases.common;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.njzz.bases.utils.Utils;
+
 import java.util.List;
 
 public class Notify {
@@ -34,21 +36,12 @@ public class Notify {
         }
     }
     //单个通知
-    public static void Send(Normal normal,int arg1,int arg2,Object argObj){
+    public static void Send(final Normal normal,final int arg1,final int arg2,final Object argObj){
         if(normal!=null) {
             if(normal instanceof UI)
-                UINotify(normal, arg1, arg2, argObj);
+                Utils.UIRun(() -> normal.OnNotify(arg1,arg2,argObj));
             else
                 normal.OnNotify(arg1,arg2,argObj);
         }
-    }
-
-    static private void UINotify(final Normal normal,final int arg1,final int arg2,final Object argObj){
-       new Handler(Looper.getMainLooper(), message -> {
-            if(message.what==0x11) {
-                normal.OnNotify(arg1,arg2,argObj);
-            }
-            return true;
-        }).sendEmptyMessage(0x11);
     }
 }

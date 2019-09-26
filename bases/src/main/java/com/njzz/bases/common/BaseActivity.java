@@ -7,18 +7,21 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import androidx.annotation.CallSuper;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 
 import com.njzz.bases.R;
+import com.njzz.bases.utils.PermissionsUtils;
 import com.njzz.bases.utils.Utils;
 
 import java.util.HashMap;
@@ -159,6 +162,14 @@ public class BaseActivity extends AppCompatActivity {
             hideInputWhenTouchOtherView(this, ev, null);
         }
         return super.dispatchTouchEvent(ev);
+    }
+
+    //权限请求回调
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        PermissionsUtils.onResult(requestCode,permissions,grantResults);
     }
 
     /**

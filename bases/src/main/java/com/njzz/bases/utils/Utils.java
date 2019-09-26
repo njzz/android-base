@@ -9,8 +9,15 @@ import android.content.Context;
 import android.graphics.Point;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Base64;
 import android.view.Display;
+
+import androidx.annotation.NonNull;
+
+import com.njzz.bases.common.Notify;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -370,11 +377,30 @@ public class Utils {
     //数字显示
     @SuppressLint("DefaultLocale")
     public static String NumShow(int num){
-        if(num<10000){
+        if(num<1000){
             return String.valueOf(num);
+        }
+        else if(num<10000){
+            float numf=num/1000f;
+            return String.format("%.1fK",numf);
         }else {
             float numf=num/10000f;
-            return String.format("%.2fw",numf);
+            return String.format("%.1fW",numf);
+        }
+    }
+
+    public static void UIRun(final Runnable runnable){
+        UIRun(runnable,0);
+    }
+
+    public static void UIRun(final Runnable runnable,int delayMs){
+        if(runnable!=null) {
+            new Handler(Looper.getMainLooper(), message -> {
+                if(message.what==1) {
+                    runnable.run();
+                }
+                return true;
+            }).sendEmptyMessageDelayed(1, delayMs);
         }
     }
 }
