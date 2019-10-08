@@ -4,6 +4,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 
+import com.njzz.bases.utils.Utils;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,7 +25,8 @@ public class VideoViewCache1 {
      */
     public static List<Bitmap> getFromCache( String strCacheFile){
         List<Bitmap> result =new ArrayList<>(IMG_SIZE_SET);
-        getFromCache(strCacheFile,result);
+        if(!getFromCache(strCacheFile,result))
+            result=null;
         return result;
     }
 
@@ -115,7 +118,7 @@ public class VideoViewCache1 {
 
     //将list<Bitmap> 序列化保存
     private static void saveToCache(String strFilePath,List<Bitmap> result){
-        if(strFilePath!=null) {
+        if(!Utils.emptystr(strFilePath)) {
             File f=new File(strFilePath);
             if(! f.exists() ) {
                 try {

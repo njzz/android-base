@@ -9,7 +9,7 @@ import java.util.List;
 public class AsyncCaller {
 
     private class ThreadDatas{//线程数据封装
-        ThreadDatas(Notify.Normal nm,int arg1,int arg2,Object arrObj){
+        ThreadDatas(Notify.Receiver nm, int arg1, int arg2, Object arrObj){
             this.arg1=arg1;
             this.arg2=arg2;
             this.arrObj=arrObj;
@@ -19,7 +19,7 @@ public class AsyncCaller {
         int arg1;
         int arg2;
         Object arrObj;
-        Notify.Normal notify;
+        Notify.Receiver notify;
     }
 
     private class ThreadRunner implements Runnable{
@@ -46,7 +46,7 @@ public class AsyncCaller {
     private int mMaxTask,mGid=0;//最大任务数，任务id
     private boolean mPause=false,mStop=true;
     private String mThreadName;
-    private Notify.Normal mRemoveListener=null;
+    private Notify.Receiver mRemoveListener=null;
     public AsyncCaller(){
         this(3,-1);//默认3个，不要获取cpu或者线程个数，可能被多用
     }
@@ -91,7 +91,7 @@ public class AsyncCaller {
         mThreadName=strName;
     }
 
-    public void setRemoveListener(Notify.Normal  nn){
+    public void setRemoveListener(Notify.Receiver nn){
         mRemoveListener=nn;
     }
 
@@ -149,7 +149,7 @@ public class AsyncCaller {
      * @param arrObj 透传参数object
      * @return 任务id ，可以根据id操作任务，-1为失败
      */
-    public int AddTask(Notify.Normal nm,int arg1,int arg2,Object arrObj){
+    public int AddTask(Notify.Receiver nm, int arg1, int arg2, Object arrObj){
         return addAtPos(nm, arg1, arg2,arrObj,-1);
     }
 
@@ -158,7 +158,7 @@ public class AsyncCaller {
      * @param index 任务插入的位置，负数为尾，0为头
      * @return
      */
-    public int AddTask(Notify.Normal nm,int arg1,int arg2,Object arrObj,int index){
+    public int AddTask(Notify.Receiver nm, int arg1, int arg2, Object arrObj, int index){
         return addAtPos(nm, arg1, arg2,arrObj,index);
     }
 
@@ -183,7 +183,7 @@ public class AsyncCaller {
         }
     }
 
-    private int addAtPos(Notify.Normal nm,int arg1,int arg2,Object arrObj,int index){
+    private int addAtPos(Notify.Receiver nm, int arg1, int arg2, Object arrObj, int index){
         int rt=-1;
         ThreadDatas tdsRemoved=null;
         if(nm!=null) {

@@ -19,7 +19,7 @@ public class ActManager {
         return gActMgr;
     }
     private ActManager(){
-        GlobalNotice.setListener(Notice.ANY, new SignalSlot.Slot() {
+        GlobalNotice.setListener(Notice.ANY, new SignalSlot.Slot(null) {
             @Override
             public void onSignal(int what, int arg1, int agr2, Object argObj) {
                 if(what==Notice.ACTIVITY_CREATE)

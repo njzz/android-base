@@ -12,7 +12,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpRequests extends ResCompetition implements Notify.Normal {
+public class HttpRequests extends ResCompetition {
 
     private Map<String,Object> mFixedParam;
     private Map<String,Object> mFixedHeader;
@@ -44,7 +44,7 @@ public class HttpRequests extends ResCompetition implements Notify.Normal {
     }
 
     private static class DataU{
-        private DataU(String url,String method,Map<String,Object> params,Notify.Normal nn){
+        private DataU(String url, String method, Map<String,Object> params, Notify.Receiver nn){
             strMethod=method;
             strUrl=url;
             this.params=params;
@@ -53,7 +53,7 @@ public class HttpRequests extends ResCompetition implements Notify.Normal {
         String strMethod;
         String strUrl;
         Map<String,Object> params;
-        Notify.Normal nn;
+        Notify.Receiver nn;
     }
     private boolean isGet(String strMethod){
         return strMethod!=null && strMethod.equals(HttpUtils.METHOD_GET);
@@ -63,11 +63,13 @@ public class HttpRequests extends ResCompetition implements Notify.Normal {
         return strMethod!=null && strMethod.equals(HttpUtils.METHOD_POST);
     }
 
-    @Override
-    public void OnNotify(int arg1, int arg2, Object argObj) {
-        DataU dataSet = (DataU) argObj;
-        OnRequest(dataSet);
-    }
+    private Notify.Receiver mCallBack=new Notify.Receiver(null) {
+        @Override
+        public void OnNotify(int arg1, int arg2, Object argObj) {
+            DataU dataSet = (DataU) argObj;
+            OnRequest(dataSet);
+        }
+    };
 
     private void OnRequest(DataU dateSet) {
         String strData = dateSet.strUrl;
@@ -143,17 +145,17 @@ public class HttpRequests extends ResCompetition implements Notify.Normal {
     }
 
     //请求
-    public boolean Post(String url,Map<String,Object> params, Notify.Normal nn) {//请求主页数据 ,type =1
+    public boolean Post(String url,Map<String,Object> params, Notify.Receiver nn) {//请求主页数据 ,type =1
         if (PathUtil.isHttpFile(url)) {
-            asyncCaller.AddTask(this, 0, 0, new DataU(url, HttpUtils.METHOD_POST,params,nn));
+            asyncCaller.AddTask(mCallBack, 0, 0, new DataU(url, HttpUtils.METHOD_POST,params,nn));
             return true;
         }
         return false;
     }
 
-    public boolean Get(String url,Map<String,Object> params, Notify.Normal nn) {//请求主页数据 ,type =1
+    public boolean Get(String url,Map<String,Object> params, Notify.Receiver nn) {//请求数据
         if (PathUtil.isHttpFile(url)) {
-            asyncCaller.AddTask(this, 0, 0, new DataU(url,HttpUtils.METHOD_GET,params,nn));
+            asyncCaller.AddTask(mCallBack, 0, 0, new DataU(url,HttpUtils.METHOD_GET,params,nn));
             return true;
         }
         return false;

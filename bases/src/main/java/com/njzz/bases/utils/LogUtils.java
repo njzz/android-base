@@ -13,7 +13,7 @@ import java.util.List;
 
 public class LogUtils {
     /** 日志输出级别NONE */
-    public static final int LEVEL_NONE = 0;
+    public static final int LEVEL_NONE = 9;
     /** 日志输出级别V */
     public static final int LEVEL_VERBOSE = 1;
     /** 日志输出级别D */

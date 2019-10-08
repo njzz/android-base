@@ -9,7 +9,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
-  * @Auth 强强
   * @Date 2019/8/28 18:06
   * @Desc 信号槽
   */
@@ -17,7 +16,10 @@ public class SignalSlot {
     //如果slot是匿名内部类，它会持有外部类的生命周期，而signaler会持有slot
     //即：如果signaler是常驻类对象，则slot不能是非常驻类的匿名对象，否则可能造成内存泄漏
     //如果slot在非常驻类里，应该申明为命名对象，然后在slot外部类生命周期将结束时，调用signaler的remove方法
-    static public abstract class Slot implements LiftAble{
+    static public abstract class Slot extends LifeAble{
+        public Slot(Activity activity){
+            super(activity);
+        }
         private int mCare=Notice.ANY;//any case
         private boolean isCare(int what){
             return mCare==Notice.ANY||mCare==what;
@@ -27,7 +29,11 @@ public class SignalSlot {
     }
 
     //ui slot ，会在ui线程通知
-    static public abstract class UISlot extends Slot{}
+    static public abstract class UISlot extends Slot{
+        public UISlot(Activity activity){
+            super(activity);
+        }
+    }
 
     public static class Signaler {
         private List<Slot> mListSolt;

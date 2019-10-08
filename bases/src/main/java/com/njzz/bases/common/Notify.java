@@ -1,47 +1,58 @@
 package com.njzz.bases.common;
 
-import android.os.Handler;
-import android.os.Looper;
+import android.app.Activity;
 
 import com.njzz.bases.utils.Utils;
 
 import java.util.List;
 
+/**
+ * 通用通知器
+ */
 public class Notify {
-    public interface Normal extends LiftAble{
-        void OnNotify(int arg1, int arg2, Object argObj);
+    public static abstract class Receiver extends LifeAble {
+        /**
+         * @param activity 关联生命周期的activity
+         */
+        public Receiver(Activity activity){
+            super(activity);
+        }
+        abstract public void OnNotify(int arg1, int arg2, Object argObj);
     }
-    public interface UI extends Normal{
+    public static abstract class UIReceiver extends Receiver {
+        public UIReceiver(Activity activity){
+            super(activity);
+        }
     }
 
     //多个通知
-    public static void AsyncSend(List<Normal> normal, int arg1, int arg2, Object argObj){
-        if(normal!=null) {
-            new Thread(() -> Send(normal, arg1, arg2, argObj)).start();
+    public static void AsyncSend(final List<Receiver> receiver, int arg1, int arg2, Object argObj){
+        if(receiver !=null) {
+            new Thread(() -> Send(receiver, arg1, arg2, argObj)).start();
         }
     }
     //单个通知
-    public static void AsyncSend(Normal normal,int arg1,int arg2,Object argObj){
-        if(normal!=null) {
-            new Thread(() -> Send(normal, arg1, arg2, argObj)).start();
+    public static void AsyncSend(Receiver receiver, int arg1, int arg2, Object argObj){
+        if(receiver !=null) {
+            new Thread(() -> Send(receiver, arg1, arg2, argObj)).start();
         }
     }
 
     //多个通知
-    public static void Send(List<Normal> normal, int arg1, int arg2, Object argObj){
-        if(normal!=null){
-            for(Normal n:normal){
+    public static void Send(final List<Receiver> receiver, int arg1, int arg2, Object argObj){
+        if(receiver !=null){
+            for(Receiver n: receiver){
                 Send(n,arg1,arg2,argObj);
             }
         }
     }
     //单个通知
-    public static void Send(final Normal normal,final int arg1,final int arg2,final Object argObj){
-        if(normal!=null) {
-            if(normal instanceof UI)
-                Utils.UIRun(() -> normal.OnNotify(arg1,arg2,argObj));
+    public static void Send(final Receiver receiver, int arg1, int arg2, Object argObj){
+        if(receiver !=null) {
+            if(receiver instanceof UIReceiver)
+                Utils.UIRun(() -> receiver.OnNotify(arg1,arg2,argObj));
             else
-                normal.OnNotify(arg1,arg2,argObj);
+                receiver.OnNotify(arg1,arg2,argObj);
         }
     }
 }

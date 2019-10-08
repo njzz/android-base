@@ -6,7 +6,7 @@ import java.util.List;
 
 public abstract class LifeBasedClass {
     LifeBasedClass() {
-        GlobalNotice.setListener(Notice.ACTIVITY_DESTROY, new SignalSlot.Slot() {
+        GlobalNotice.setListener(Notice.ACTIVITY_DESTROY, new SignalSlot.Slot(null) {
             @Override
             public void onSignal(int what, int arg1, int agr2, Object argObj) {
                 onActivityLifeEnd((Activity) argObj);
@@ -16,7 +16,7 @@ public abstract class LifeBasedClass {
 
     protected abstract void onActivityLifeEnd(Activity activity);
 
-    protected void listProcess(List<?extends LiftAble> list,Activity activity){
+    protected void listProcess(List<?extends LifeAble> list, Activity activity){
         if(list!=null && activity!=null ) {
             for (int i = 0; i < list.size(); ) {
                 if(activity.equals(list.get(i).getAttached())){

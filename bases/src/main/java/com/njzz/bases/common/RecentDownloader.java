@@ -14,7 +14,7 @@ import java.net.URL;
 /**
  * 最近下载模式，优先下载最近添加的资源
  */
-public class RecentDownloader extends ResCompetition implements Notify.Normal {
+public class RecentDownloader extends ResCompetition{
     private int mDownloadVersion=1;
 
     private int beginDownload(String strUrl,String strFile) {
@@ -107,7 +107,7 @@ public class RecentDownloader extends ResCompetition implements Notify.Normal {
 
     public RecentDownloader(int maxBothTask,int maxCacheTask){
         asyncCaller=new AsyncCaller(maxBothTask,maxCacheTask);
-        asyncCaller.setRemoveListener(new Notify.Normal() {
+        asyncCaller.setRemoveListener(new Notify.Receiver(null) {
             @Override
             public void OnNotify(int arg1, int arg2, Object argObj) {
                 Datas curTask=(Datas)argObj;
@@ -117,18 +117,21 @@ public class RecentDownloader extends ResCompetition implements Notify.Normal {
         });
     }
 
-    @Override
-    public void OnNotify(int arg1, int arg2, Object argObj){
-        Datas curTask=(Datas)argObj;
-        int code=beginDownload(curTask.urlStr,curTask.pathFile);
-        setResLoaded(curTask.urlStr,code,0,curTask.pathFile);
-    }
 
-    private void addTask(String urlStr, final String path, Notify.Normal nn) {
+    private Notify.Receiver mCallBack=new Notify.Receiver(null) {
+        @Override
+        public void OnNotify(int arg1, int arg2, Object argObj) {
+            Datas curTask = (Datas) argObj;
+            int code = beginDownload(curTask.urlStr, curTask.pathFile);
+            setResLoaded(curTask.urlStr, code, 0, curTask.pathFile);
+        }
+    };
+
+    private void addTask(String urlStr, final String path, Notify.Receiver nn) {
         if(!Utils.emptystr(urlStr) && !isResLoad(urlStr,nn)) {
             LogUtils.d("add recent download task:"+path);
             ++mDownloadVersion;
-            asyncCaller.AddTask(this, 0, 0, new Datas(urlStr, path),0);
+            asyncCaller.AddTask(mCallBack, 0, 0, new Datas(urlStr, path),0);
         }
     }
 }

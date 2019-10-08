@@ -14,7 +14,7 @@ public class NetResCache  {
 
     /**
      * 设置自定义的loader,load为加载网络资源的函数对象，默认为HttpDownloader
-     * 有三个参数，String:下载链接  String:本地保存文件路径  Notify.Normal:下载完成通知对象，通知参数和HttpDownloader一样。
+     * 有三个参数，String:下载链接  String:本地保存文件路径  Notify.Receiver:下载完成通知对象，通知参数和HttpDownloader一样。
      * */
     Functor mLoader;
     public NetResCache(Functor loder){
@@ -28,7 +28,7 @@ public class NetResCache  {
      * @param listener 不存在或者下载中的回调
      * @return
      */
-    public String getPath(String strUri, ResUtils.ResType resType, Notify.Normal listener){
+    public String getPath(String strUri, ResUtils.ResType resType, Notify.Receiver listener){
         String resPath = ResUtils.getDiskPath(strUri, resType);
         if(Utils.emptystr(resPath)){//路径或者uri为空
             return null;
@@ -47,7 +47,7 @@ public class NetResCache  {
      * @param strDownload 保存的本地路径
      * @param listener 结果通知
      */
-    private void load(final String strUri, String strDownload, Notify.Normal listener){
+    private void load(final String strUri, String strDownload, Notify.Receiver listener){
         //添加到下载队列
         if(mLoader==null) {
             HttpDownloader.add(strUri, strDownload, listener);

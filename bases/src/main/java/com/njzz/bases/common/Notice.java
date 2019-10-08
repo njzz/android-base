@@ -1,6 +1,6 @@
 package com.njzz.bases.common;
 
-//publisher通告消息
+//通告消息
 public class Notice {
     public static final int ANY=-1;//关注任意通知
     //系统通知
