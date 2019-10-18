@@ -22,6 +22,7 @@ import com.njzz.bases.utils.LogUtils;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
+//自定义recyclerview 实现刷新。
 public class RecylerViewPlus extends RecyclerView {
 
     public interface  onRefreshListener{
@@ -226,7 +227,7 @@ public class RecylerViewPlus extends RecyclerView {
     }
 
     private boolean isFirstAllVisable(){
-        return !canScrollHorizontally(-1);
+        return !canScrollVertically(-1);
 //        RecyclerView.LayoutManager lm= getLayoutManager();
 //        if(lm!=null){
 //            if(lm instanceof LinearLayoutManager ){//GridLayoutManager 从 LinearLayoutManager 派生
@@ -254,7 +255,7 @@ public class RecylerViewPlus extends RecyclerView {
     }
 
     private boolean isLastAllVisable(){
-        return canScrollHorizontally(1);
+        return canScrollVertically(1);
 //        RecyclerView.LayoutManager lm= getLayoutManager();
 //        Adapter adapter=getAdapter();
 //        if(lm!=null && adapter!=null){

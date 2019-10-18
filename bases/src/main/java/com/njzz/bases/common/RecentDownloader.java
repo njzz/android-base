@@ -12,7 +12,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
- * 最近下载模式，优先下载最近添加的资源
+ * 最近下载模式，下载最近添加的资源
  */
 public class RecentDownloader extends ResCompetition{
     private int mDownloadVersion=1;

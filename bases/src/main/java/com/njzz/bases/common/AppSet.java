@@ -29,13 +29,13 @@ public class AppSet extends Application {
                     @Override
                     public void onAvailable(Network network) {
                         super.onAvailable(network);
-                        GlobalNotice.Notice(Notice.NET_AVAILABLE);
+                        GlobalNotice.Notice(SysNotice.NET_AVAILABLE);
                     }
                     //网络丢失的回调
                     @Override
                     public void onLost(Network network) {
                         super.onLost(network);
-                        GlobalNotice.Notice(Notice.NET_LOST);
+                        GlobalNotice.Notice(SysNotice.NET_LOST);
                     }
                 });
             }
@@ -44,7 +44,7 @@ public class AppSet extends Application {
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             @Override
             public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle bundle) {
-                GlobalNotice.Notice(Notice.ACTIVITY_CREATE,activity);
+                GlobalNotice.Notice(SysNotice.ACTIVITY_CREATE,activity);
             }
 
             @Override
@@ -60,7 +60,7 @@ public class AppSet extends Application {
 
             @Override
             public void onActivityDestroyed(@NonNull Activity activity) {
-                GlobalNotice.Notice(Notice.ACTIVITY_DESTROY,activity);
+                GlobalNotice.Notice(SysNotice.ACTIVITY_DESTROY,activity);
 
             }
         });//注册activity生命周期管理

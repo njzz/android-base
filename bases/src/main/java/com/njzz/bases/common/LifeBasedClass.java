@@ -4,9 +4,12 @@ import android.app.Activity;
 
 import java.util.List;
 
+/**
+ * 涉及到生命周期管理的基类，需要移除回调
+ */
 public abstract class LifeBasedClass {
     LifeBasedClass() {
-        GlobalNotice.setListener(Notice.ACTIVITY_DESTROY, new SignalSlot.Slot(null) {
+        GlobalNotice.setListener(SysNotice.ACTIVITY_DESTROY, new SignalSlot.Slot(null) {
             @Override
             public void onSignal(int what, int arg1, int agr2, Object argObj) {
                 onActivityLifeEnd((Activity) argObj);

@@ -20,9 +20,9 @@ public class SignalSlot {
         public Slot(Activity activity){
             super(activity);
         }
-        private int mCare=Notice.ANY;//any case
+        private int mCare= SysNotice.ANY;//any case
         private boolean isCare(int what){
-            return mCare==Notice.ANY||mCare==what;
+            return mCare== SysNotice.ANY||mCare==what;
         }
         //////////////////////////////////////
         public abstract void onSignal(int what,int arg1,int agr2,Object argObj);
@@ -39,7 +39,7 @@ public class SignalSlot {
         private List<Slot> mListSolt;
 
         public boolean addSolt(Slot slot){
-            return addSolt(Notice.ANY,slot);
+            return addSolt(SysNotice.ANY,slot);
         }
         public boolean addSolt(int care,Slot slot) {
             if(slot!=null){
@@ -102,7 +102,7 @@ public class SignalSlot {
         }
         //同步通知(UI通知依然会异步)
         public void signal(int what,int arg1,int arg2,Object argObj){
-            if(what==Notice.ACTIVITY_DESTROY){//生命周期管理，自身不能从LifeBasedClass派生，不然不能初始化发布器
+            if(what== SysNotice.ACTIVITY_DESTROY){//生命周期管理，自身不能从LifeBasedClass派生，不然不能初始化发布器
                 removeSlot((Activity) argObj);
             }
 

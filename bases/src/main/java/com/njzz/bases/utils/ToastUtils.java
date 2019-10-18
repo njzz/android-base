@@ -11,7 +11,7 @@ public class ToastUtils {
         Utils.UIRun(()->{
             Toast toast = Toast.makeText(context, messages, Toast.LENGTH_LONG);
             toast.setGravity(Gravity.CENTER, 0, 0);//居中显示
-            View view = toast.getView();
+//            View view = toast.getView();
 //        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.Q) {
 //            view.setTransitionAlpha(128.0f);
 //        }

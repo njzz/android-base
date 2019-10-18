@@ -19,12 +19,12 @@ public class ActManager {
         return gActMgr;
     }
     private ActManager(){
-        GlobalNotice.setListener(Notice.ANY, new SignalSlot.Slot(null) {
+        GlobalNotice.setListener(SysNotice.ANY, new SignalSlot.Slot(null) {
             @Override
             public void onSignal(int what, int arg1, int agr2, Object argObj) {
-                if(what==Notice.ACTIVITY_CREATE)
+                if(what== SysNotice.ACTIVITY_CREATE)
                     addFirst((Activity) argObj);
-                else if(what==Notice.ACTIVITY_DESTROY)
+                else if(what== SysNotice.ACTIVITY_DESTROY)
                     remove((Activity) argObj);
             }
         });
