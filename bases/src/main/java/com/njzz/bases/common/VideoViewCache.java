@@ -16,7 +16,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VideoViewCache1 {
+public class VideoViewCache {
     private static final int IMG_SIZE_SET =3;
     /**
      * 从cache里面读取图片帧
@@ -122,11 +122,14 @@ public class VideoViewCache1 {
             File f=new File(strFilePath);
             if(! f.exists() ) {
                 try {
-                    ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(f));
+                    File ft=new File(strFilePath+".tmp");
+                    ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(ft));
                     List<byte[]> lst=new ArrayList<>();
                     toBytes(result,lst);
                     out.writeObject(lst);
                     out.close();
+
+                    ft.renameTo(f);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

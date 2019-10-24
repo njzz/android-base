@@ -7,7 +7,6 @@ import com.njzz.bases.utils.BitmapUtils;
 import com.njzz.bases.utils.LogUtils;
 import com.njzz.bases.utils.Utils;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +40,7 @@ public class ResManager {
         private List<Bitmap> getFromCache(String strUri){
             String strCache=ResUtils.getDiskPath(strUri,ResUtils.ResType.IMG_VIDEO_THUMB);
             if(ResUtils.testFile(strCache)){//如果存在，直接加载缓存文件
-                return VideoViewCache1.getFromCache(strCache);
+                return VideoViewCache.getFromCache(strCache);
             }
             return null;
         }
@@ -67,7 +66,7 @@ public class ResManager {
                     String strVideo = ResUtils.getDiskPath(strUri, ResUtils.ResType.VIDEO_THUMB);
                     if(ResUtils.testFile(strVideo)){//该视频文件存在
                         String strCache = ResUtils.getDiskPath(strUri, ResUtils.ResType.IMG_VIDEO_THUMB);
-                        listCache=VideoViewCache1.getFromVideo(strVideo, strCache);
+                        listCache= VideoViewCache.getFromVideo(strVideo, strCache);
                     }
 
                     if(listCache==null){//视频文件不存在，去下载
