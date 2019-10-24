@@ -12,6 +12,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.njzz.bases.utils.LogUtils;
+
 public class AppSet extends Application {
     private static Application application;
     static public Application app(){ return application;}
@@ -19,6 +21,8 @@ public class AppSet extends Application {
     public void onCreate() {
         super.onCreate();
         application=this;
+        //BaseActivity.setDefaultInit();//在这里设置，如果app从后台恢复，则会恢复最后的activity
+
         ActManager.ins();//初始化管理器
         /*网络改变监听*/
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {

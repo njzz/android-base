@@ -127,7 +127,7 @@ public class RecentDownloader extends ResCompetition{
         }
     };
 
-    private void addTask(String urlStr, final String path, Notify.Receiver nn) {
+    public void addTask(String urlStr, final String path, Notify.Receiver nn) {
         if(!Utils.emptystr(urlStr) && !isResLoad(urlStr,nn)) {
             LogUtils.d("add recent download task:"+path);
             ++mDownloadVersion;

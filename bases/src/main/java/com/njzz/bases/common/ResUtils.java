@@ -96,13 +96,11 @@ public class ResUtils {
         return getTypePath(resType)+getID(strUri,resType);
     }
 
-    //资源是否存在
-    public boolean isExist(String strUri,ResType resType){
-        String resPath = getDiskPath(strUri, resType);
-        if(Utils.emptystr(resPath)){
-            return false;
-        }
-        return new File(resPath).exists();
+    /**
+     * 检查文件是否存在
+     */
+    public static boolean testFile(String strFile){
+        return !Utils.emptystr(strFile) && new File(strFile).exists();
     }
 
     /**

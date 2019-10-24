@@ -42,6 +42,7 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if(!checkDefaultStart()) return;
         if(mFixScreen!=0){//如果固定屏幕
             if(mFixScreen>0){
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);//竖屏
@@ -219,4 +220,24 @@ public class BaseActivity extends AppCompatActivity {
         }
         return false;
     }
+
+    //决定app在后台被杀后，恢复的界面(根据调用 setDefaultInit 的位置)。
+    // 注:如果直接恢复的不是main，则需要检查全局变量设置
+    static boolean gDefaultStarted=false;//如果被杀，则会为默认false
+    public static void setDefaultInit(){gDefaultStarted=true;}
+    private boolean checkDefaultStart() {
+        if (gDefaultStarted) {
+            return true;
+        }
+        Context baseContext = getBaseContext();
+        Intent i = baseContext.getPackageManager().getLaunchIntentForPackage(baseContext.getPackageName());
+        if (i != null) {
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(i);
+            finish();
+            return false;
+        }
+        return true;
+    }
+
 }

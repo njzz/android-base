@@ -78,7 +78,7 @@ public class SignalSlot {
         private void removeSlot(Activity activity){
             synchronized (this) {
                 for (int i = 0; i < mListSolt.size(); ) {
-                    if(activity.equals(mListSolt.get(i).getAttached())){
+                    if(activity.equals(mListSolt.get(i).getLifeBind())){
                         mListSolt.remove(i);
                     }else{
                         ++i;

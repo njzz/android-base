@@ -4,6 +4,7 @@ import android.app.Activity;
 
 import com.njzz.bases.utils.Utils;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -16,6 +17,31 @@ public class Notify {
          */
         public Receiver(Activity activity){
             super(activity);
+        }
+
+        //监视器
+        private List<Receiver> mObserver;
+        public void addObserver(Receiver normal){
+            if(normal==null) return;
+            if(mObserver==null){
+                synchronized (this){
+                    if(mObserver==null)
+                        mObserver=new LinkedList<>();
+                }
+            }
+
+            synchronized (this) {
+                if (mObserver.indexOf(normal) == -1) {
+                    mObserver.add(normal);
+                }
+            }
+        }
+        public void removeObserver(Receiver normal){
+            if(mObserver!=null){
+                synchronized (this) {
+                    mObserver.remove(normal);
+                }
+            }
         }
         abstract public void OnNotify(int arg1, int arg2, Object argObj);
     }
@@ -49,6 +75,11 @@ public class Notify {
     //单个通知
     public static void Send(final Receiver receiver, int arg1, int arg2, Object argObj){
         if(receiver !=null) {
+
+            if(receiver.mObserver!=null){//先通知observer
+                Send(receiver.mObserver,arg1,arg2,argObj);
+            }
+
             if(receiver instanceof UIReceiver)
                 Utils.UIRun(() -> receiver.OnNotify(arg1,arg2,argObj));
             else

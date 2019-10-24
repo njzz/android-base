@@ -403,5 +403,16 @@ public class Utils {
             }).sendEmptyMessageDelayed(1, delayMs);
         }
     }
+
+    //类型转换
+    @SuppressWarnings("unchecked")
+    public static <T> T cast(Object obj) {
+        try {
+            return (T) obj;
+        }catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
 

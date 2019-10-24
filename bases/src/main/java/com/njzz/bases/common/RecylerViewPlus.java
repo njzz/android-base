@@ -143,10 +143,11 @@ public class RecylerViewPlus extends RecyclerView {
 //            return true;
         // onTouchEvent 经常收不到 ACTION_DOWN
         if ( mListener !=null&& mHeaderAndFooterWrapper!=null && mInProcessing==PROCESS_NONE) {
-            if(ev.getAction() == MotionEvent.ACTION_DOWN ) {
+            int action = ev.getAction();
+            if(action == MotionEvent.ACTION_DOWN ) {
                 mLastY = ev.getRawY();
             }
-            else if(ev.getAction() == MotionEvent.ACTION_MOVE) {
+            else if(action == MotionEvent.ACTION_MOVE) {
                 float yMove = ev.getRawY();
                 if (yMove - mLastY > 1) {//下拉
                     if (isFreshSet() && isFirstAllVisable() && mListener.canRefresh() ) {

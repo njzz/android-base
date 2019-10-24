@@ -12,6 +12,8 @@ import androidx.annotation.CallSuper;
 import androidx.recyclerview.widget.RecyclerView;
 
 
+import com.njzz.bases.utils.Utils;
+
 import java.util.List;
 
 public abstract class QuickAdapter<T> extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
@@ -34,7 +36,7 @@ public abstract class QuickAdapter<T> extends RecyclerView.Adapter<RecyclerView.
 
     //这个为final ,如果需要设置，复写 getViewType
     @Override
-    final public int getItemViewType(int position) {// 瀑布流多布局设置，在这列设置两个不同的item type，以区分不同的布局
+    final public int getItemViewType(int position) {//
         if(mSpcialItem!=null ){
             int itemViewType = mSpcialItem.getItemViewType(mDatas.size(), position);
             if(itemViewType!=-1){
@@ -91,7 +93,7 @@ public abstract class QuickAdapter<T> extends RecyclerView.Adapter<RecyclerView.
     }
 
 
-
+/////////////////////////////////////////////////////////////////通用的viewHolder
     public static class VH extends RecyclerView.ViewHolder{
         private SparseArray<View> mViews;
         private View mConvertView;
@@ -147,7 +149,30 @@ public abstract class QuickAdapter<T> extends RecyclerView.Adapter<RecyclerView.
                     view = ll.getChildAt(nIndex);
                 }
             }
-            return (T)view;
+            return Utils.cast( view );
+        }
+
+        //获取第N个T 类型的 view
+        public <T extends View> T getTypedIndexView(int nIndex) {
+            View view = null;
+            int index=0;
+            ViewGroup vg=Utils.cast( mConvertView);
+            if(vg!=null) {
+                if (nIndex < vg.getChildCount()) {
+                    for(int i=0;i<vg.getChildCount();++i){//枚举
+                        view = vg.getChildAt(i);
+                        T vCast= Utils.cast(view);//如果是需要的类型
+                        if(vCast!=null ){
+                            if(index==nIndex){
+                                break;
+                            }else{
+                                index++;
+                            }
+                        }
+                    }
+                }
+            }
+            return Utils.cast(view);
         }
 
         public void setText(int id, String value){

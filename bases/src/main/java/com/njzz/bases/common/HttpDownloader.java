@@ -109,8 +109,11 @@ public class HttpDownloader extends ResCompetition{
     };
 
     private void addTask(String urlStr, final String path, Notify.Receiver nn) {
-        if(!Utils.emptystr(urlStr) && !isResLoad(urlStr,nn)) {
-            asyncCaller.AddTask(mThreadBack, 0, 0, new Datas(urlStr, path));
+        if(!Utils.emptystr(urlStr)) {
+            if(!isResLoad(urlStr,nn))
+                asyncCaller.AddTask(mThreadBack, 0, 0, new Datas(urlStr, path));
+        }else {
+            Notify.Send(nn,ErrorCode.CONNECT,0,null);
         }
     }
 
@@ -125,5 +128,10 @@ public class HttpDownloader extends ResCompetition{
     public static void add(String strUrl, String strPath, Notify.Receiver nn){
         //LogUtils.d("add download task:"+strUrl);
         httpDownloader.addTask(strUrl,strPath,nn);
+    }
+
+    //测试是否成功
+    public  static boolean isSuccess(int rtCode){
+        return rtCode==ErrorCode.SUCCESS || rtCode==ErrorCode.EXIST;
     }
 }

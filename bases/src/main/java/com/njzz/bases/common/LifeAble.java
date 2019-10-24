@@ -7,5 +7,5 @@ public class LifeAble {
     public LifeAble(Activity activity){
         mActivityBind=activity;
     }
-    public Activity getAttached(){return mActivityBind;}
+    public Activity getLifeBind(){return mActivityBind;}
 }

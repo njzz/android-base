@@ -22,7 +22,7 @@ public abstract class LifeBasedClass {
     protected void listProcess(List<?extends LifeAble> list, Activity activity){
         if(list!=null && activity!=null ) {
             for (int i = 0; i < list.size(); ) {
-                if(activity.equals(list.get(i).getAttached())){
+                if(activity.equals(list.get(i).getLifeBind())){
                     list.remove(i);
                 }else{
                     ++i;

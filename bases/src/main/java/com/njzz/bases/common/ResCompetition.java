@@ -40,7 +40,7 @@ public class ResCompetition extends LifeBasedClass{
                 mExistMap.put(strKey, receivers);
                 bRtValue=false;
             }
-            if(nn!=null) {//添加到通知队列
+            if(nn!=null && receivers.indexOf(nn)==-1 ) {//添加到通知队列
                 receivers.add(nn);
             }
         }
@@ -55,7 +55,7 @@ public class ResCompetition extends LifeBasedClass{
      * @param argObj 透传给notify
      */
     protected void setResLoaded(String strKey,int arg1,int arg2,Object argObj){
-        List<Notify.Receiver> receivers =null;
+        List<Notify.Receiver> receivers;
         synchronized (this){
             //查找对应key组
              receivers = mExistMap.remove(strKey);
