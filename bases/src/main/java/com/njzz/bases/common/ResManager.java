@@ -171,13 +171,13 @@ public class ResManager {
      * @param nn 如果返回null，则会通知[arg1 为 httpdownloader 的 errcode ,argObj 为本地文件地址]
      * @return
      */
-//    static public Bitmap getBitmapSrc(String strUri, Receiver nn){
-//        String resPath = ResUtils.getDiskPath(strUri, ResUtils.ResType.IMAGE_CACHE);
-//        if(ResUtils.testFile(resPath)){//该资源文件存在
-//            return BitmapUtils.bitmapFromFile(resPath);
-//        }
-//
-//        HttpDownloader.add(strUri, resPath, nn);
-//        return null;
-//    }
+    static public Bitmap getBitmapSrc(String strUri, Receiver nn){
+        String resPath = ResUtils.getDiskPath(strUri, ResUtils.ResType.IMAGE_CACHE);
+        if(ResUtils.testFile(resPath)){//该资源文件存在
+            return BitmapUtils.bitmapFromFile(resPath);
+        }
+
+        HttpDownloader.add(strUri, resPath, nn);
+        return null;
+    }
 }
