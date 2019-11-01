@@ -8,18 +8,14 @@ import java.util.List;
 
 public class AsyncCaller {
 
-    private class ThreadDatas{//线程数据封装
-        ThreadDatas(Notify.Receiver nm, int arg1, int arg2, Object arrObj){
-            this.arg1=arg1;
-            this.arg2=arg2;
-            this.arrObj=arrObj;
+    private class ThreadTask {//线程数据封装
+        ThreadTask(Receiver nm, MessageSet ms){
+            this.ms=ms;
             this.notify=nm;
         }
         int tid;//任务id
-        int arg1;
-        int arg2;
-        Object arrObj;
-        Notify.Receiver notify;
+        MessageSet ms;
+        Receiver notify;
     }
 
     private class ThreadRunner implements Runnable{
@@ -29,10 +25,10 @@ public class AsyncCaller {
                 Thread.currentThread().setName(mThreadName);
             }
             while(!mStop) {
-                ThreadDatas task = getTask();
+                ThreadTask task = getTask();
                 if (task != null && !mStop ) {
                     try {
-                        task.notify.OnNotify(task.arg1, task.arg2, task.arrObj);
+                        Notify.Send(task.notify,task.ms);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -42,11 +38,11 @@ public class AsyncCaller {
     }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
     private List<ThreadRunner> mListRunner=new ArrayList<>();//小的不变的队列
-    private LinkedList<ThreadDatas> mListTasks=new LinkedList<>();//经常增删的队列
+    private LinkedList<ThreadTask> mListTasks=new LinkedList<>();//经常增删的队列
     private int mMaxTask,mGid=0;//最大任务数，任务id
     private boolean mPause=false,mStop=true;
     private String mThreadName;
-    private Notify.Receiver mRemoveListener=null;
+    private Receiver mRemoveListener=null;
     public AsyncCaller(){
         this(3,-1);//默认3个，不要获取cpu或者线程个数，可能被多用
     }
@@ -79,6 +75,8 @@ public class AsyncCaller {
         return mListTasks.size();
     }
 
+    public int getThreadCount() {return mListRunner.size();}
+
     public boolean isPaused(){
         return mPause;
     }
@@ -87,12 +85,12 @@ public class AsyncCaller {
         return mStop;
     }
 
-    public void setName(String strName){
-        mThreadName=strName;
+    public void setRemoveListener(Receiver nn){
+        mRemoveListener=nn;
     }
 
-    public void setRemoveListener(Notify.Receiver nn){
-        mRemoveListener=nn;
+    public void setName(String strName){
+        mThreadName=strName;
     }
 
     /**
@@ -144,13 +142,11 @@ public class AsyncCaller {
     /**
      * 增加任务,增加到最后
      * @param nm 通知对象
-     * @param arg1 透传参数1
-     * @param arg2 透传参数2
-     * @param arrObj 透传参数object
+     * @param ms 透传参数1
      * @return 任务id ，可以根据id操作任务，-1为失败
      */
-    public int AddTask(Notify.Receiver nm, int arg1, int arg2, Object arrObj){
-        return addAtPos(nm, arg1, arg2,arrObj,-1);
+    public int AddTask(Receiver nm, MessageSet ms){
+        return addAtPos(nm, ms,-1);
     }
 
     /**
@@ -158,8 +154,8 @@ public class AsyncCaller {
      * @param index 任务插入的位置，负数为尾，0为头
      * @return
      */
-    public int AddTask(Notify.Receiver nm, int arg1, int arg2, Object arrObj, int index){
-        return addAtPos(nm, arg1, arg2,arrObj,index);
+    public int AddTask(Receiver nm, MessageSet ms, int index){
+        return addAtPos(nm, ms,index);
     }
 
     /**
@@ -167,7 +163,7 @@ public class AsyncCaller {
      */
     public boolean removeTask(int id){
         synchronized (this){
-            for(ThreadDatas td:mListTasks){
+            for(ThreadTask td:mListTasks){
                 if(td.tid==id){
                     mListTasks.remove(td);
                     return true;
@@ -183,11 +179,11 @@ public class AsyncCaller {
         }
     }
 
-    private int addAtPos(Notify.Receiver nm, int arg1, int arg2, Object arrObj, int index){
+    private int addAtPos(Receiver nm,MessageSet ms, int index){
         int rt=-1;
-        ThreadDatas tdsRemoved=null;
+        ThreadTask tdsRemoved=null;
         if(nm!=null) {
-            ThreadDatas tds=new ThreadDatas(nm,arg1,arg2,arrObj);
+            ThreadTask tds=new ThreadTask(nm,ms);
             synchronized (this) {//必须在lock里等待，不然会异常
                 rt=++mGid;
                 tds.tid=rt;//任务id
@@ -214,7 +210,7 @@ public class AsyncCaller {
 
         if(tdsRemoved!=null) {
             if (mRemoveListener != null) {//如果有则通知
-                Notify.Send(mRemoveListener, tdsRemoved.arg1,tdsRemoved.arg2,tdsRemoved.arrObj);
+                Notify.Send(mRemoveListener, tdsRemoved.ms);
             }else {//不要通知 tdsRemoved.notify ，没有意义，参数也没有意义
                 LogUtils.w("AsyncCaller Task removed,but no remove listener exist.");
             }
@@ -227,8 +223,8 @@ public class AsyncCaller {
      * 获取任务
      * @return
      */
-    private ThreadDatas getTask(){
-        ThreadDatas td=null;
+    private ThreadTask getTask(){
+        ThreadTask td=null;
         try {
             synchronized (this) {//必须在lock里等待，不然会异常
                 if ( mPause || mListTasks.size() == 0) {
@@ -247,8 +243,4 @@ public class AsyncCaller {
 
         return td;
     }
-
-
-
-
 }

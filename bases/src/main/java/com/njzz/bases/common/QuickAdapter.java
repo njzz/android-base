@@ -55,6 +55,12 @@ public abstract class QuickAdapter<T> extends RecyclerView.Adapter<RecyclerView.
         return mCommonItemLayout;
     }
 
+    protected T getData(int i){
+        if(i<mDatas.size())
+            return mDatas.get(i);
+        return null;
+    }
+
     @Override @CallSuper
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if(mSpcialItem!=null) {

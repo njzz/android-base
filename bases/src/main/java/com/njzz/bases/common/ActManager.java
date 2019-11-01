@@ -21,11 +21,11 @@ public class ActManager {
     private ActManager(){
         GlobalNotice.setListener(SysNotice.ANY, new SignalSlot.Slot(null) {
             @Override
-            public void onSignal(int what, int arg1, int agr2, Object argObj) {
-                if(what== SysNotice.ACTIVITY_CREATE)
-                    addFirst((Activity) argObj);
-                else if(what== SysNotice.ACTIVITY_DESTROY)
-                    remove((Activity) argObj);
+            public void onSignal(MessageSet ms) {
+                if(ms.what== SysNotice.ACTIVITY_CREATE)
+                    addFirst((Activity) ms.argObj);
+                else if(ms.what== SysNotice.ACTIVITY_DESTROY)
+                    remove((Activity) ms.argObj);
             }
         });
     }

@@ -21,18 +21,18 @@ public class ResManager {
      */
     static private class VideoThumbCache extends ResCompetition {
         AsyncCaller mAsyncCaller;//多线程解
-        Notify.Receiver mDecoder=new DecoderWrap();
-        Notify.Receiver mDownloadNotify = new  Notify.Receiver(null) {
+        Receiver mDecoder=new DecoderWrap();
+        Receiver mDownloadNotify = new  Receiver(null) {
             @Override
-            public void OnNotify(int arg1, int arg2, Object argObj) {
+            public void OnNotify(MessageSet ms) {
                 //下载完成的直接去解码
-                String strUri = Utils.cast(argObj);
-                if(HttpDownloader.isSuccess(arg1)) {
+                String strUri = Utils.cast(ms.argObj);
+                if(HttpDownloader.isSuccess(ms.what)) {
                     //下载完成的直接去加载
                     addDecodeTask(strUri );
                 }else{//下载失败的
-                    LogUtils.e("缩略视频下载失败,code: "+arg1+" url:"+strUri);
-                    setResLoaded(strUri, arg1, 0, strUri);//清理通知
+                    LogUtils.e("缩略视频下载失败,code: "+ms.what+" url:"+strUri);
+                    setResLoaded(strUri,new MessageSet( ms.what, strUri));//清理通知
                 }
             }
         };
@@ -45,14 +45,14 @@ public class ResManager {
             return null;
         }
 
-        private class DecoderWrap extends Notify.Receiver {
+        private class DecoderWrap extends Receiver {
             private DecoderWrap(){
                 super(null);
             }
             //异步获取帧
             @Override
-            public void OnNotify(int arg1, int arg2, Object argObj) {
-                String strUri = Utils.cast(argObj);
+            public void OnNotify(MessageSet ms) {
+                String strUri = Utils.cast(ms.argObj);
 
                 List<Bitmap> listCache = null;
                 try {
@@ -77,7 +77,7 @@ public class ResManager {
                 } finally {
                     if ( listCache!= null) {
                         GlobalCache.set(strUri,listCache);
-                        setResLoaded(strUri, ErrorCode.SUCCESS, 0, strUri);
+                        setResLoaded(strUri,new MessageSet( ErrorCode.SUCCESS, strUri));
                     }
                 }
             }
@@ -87,10 +87,10 @@ public class ResManager {
         private void addDecodeTask(String strUri){
             if(mAsyncCaller==null)
                 mAsyncCaller=new AsyncCaller();
-            mAsyncCaller.AddTask(mDecoder,0,0,strUri);
+            mAsyncCaller.AddTask(mDecoder,new MessageSet(0,strUri));
         }
 
-        private List<Bitmap> getVideoFrame(String strUri, Notify.Receiver nn){
+        private List<Bitmap> getVideoFrame(String strUri, Receiver nn){
             if(ResUtils.isVideo(strUri)){//视频
 
                 //从缓存获取
@@ -100,7 +100,7 @@ public class ResManager {
                 }
 
                 //如果没有正在加载，开始加载
-                if(!Utils.emptystr(strUri) && !isResLoad(strUri,nn)){
+                if(!Utils.emptystr(strUri) && resNotLoaded(strUri,nn)){
                     addDecodeTask(strUri);
                 }
 
@@ -124,7 +124,7 @@ public class ResManager {
      * @param nn 如果返回null，则会通知[arg1 为 httpdownloader 的 errcode,argObj 为本地文件地址]
      * @return
      */
-    static public List<Bitmap> getVideoFrame(String strUri, Notify.Receiver nn){
+    static public List<Bitmap> getVideoFrame(String strUri, Receiver nn){
         return mVideoThumbCache.getVideoFrame(strUri,nn);
     }
 
@@ -134,7 +134,7 @@ public class ResManager {
      * @param nn 如果返回null，则会通知[arg1 为 httpdownloader 的 errcode ,argObj 为本地文件地址]
      * @return
      */
-    static public Bitmap getBitmap(String strUri, Notify.Receiver nn){
+    static public Bitmap getBitmap(String strUri, Receiver nn){
         Bitmap bmp = GlobalCache.get(strUri);
         if(bmp!=null){//该资源文件存在
             return bmp;
@@ -152,10 +152,10 @@ public class ResManager {
 
     //异步解码图片
     @SuppressLint("StaticFieldLeak")
-    static private Notify.Receiver gDecoder=new Notify.Receiver(null) {
+    static private Receiver gDecoder=new Receiver(null) {
         @Override
-        public void OnNotify(int arg1, int arg2, Object argObj) {
-            String strUri=Utils.cast(argObj);
+        public void OnNotify(MessageSet ms) {
+            String strUri=Utils.cast(ms.argObj);
             if(strUri!=null){
                 String resPath = ResUtils.getDiskPath(strUri, ResUtils.ResType.IMAGE_CACHE);
                 if(ResUtils.testFile(resPath)){//该资源文件存在
@@ -171,13 +171,13 @@ public class ResManager {
      * @param nn 如果返回null，则会通知[arg1 为 httpdownloader 的 errcode ,argObj 为本地文件地址]
      * @return
      */
-    static public Bitmap getBitmapSrc(String strUri, Notify.Receiver nn){
-        String resPath = ResUtils.getDiskPath(strUri, ResUtils.ResType.IMAGE_CACHE);
-        if(ResUtils.testFile(resPath)){//该资源文件存在
-            return BitmapUtils.bitmapFromFile(resPath);
-        }
-
-        HttpDownloader.add(strUri, resPath, nn);
-        return null;
-    }
+//    static public Bitmap getBitmapSrc(String strUri, Receiver nn){
+//        String resPath = ResUtils.getDiskPath(strUri, ResUtils.ResType.IMAGE_CACHE);
+//        if(ResUtils.testFile(resPath)){//该资源文件存在
+//            return BitmapUtils.bitmapFromFile(resPath);
+//        }
+//
+//        HttpDownloader.add(strUri, resPath, nn);
+//        return null;
+//    }
 }

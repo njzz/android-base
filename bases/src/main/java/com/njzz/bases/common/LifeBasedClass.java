@@ -11,8 +11,8 @@ public abstract class LifeBasedClass {
     LifeBasedClass() {
         GlobalNotice.setListener(SysNotice.ACTIVITY_DESTROY, new SignalSlot.Slot(null) {
             @Override
-            public void onSignal(int what, int arg1, int agr2, Object argObj) {
-                onActivityLifeEnd((Activity) argObj);
+            public void onSignal(MessageSet ms) {
+                onActivityLifeEnd((Activity) ms.argObj);
             }
         });
     }

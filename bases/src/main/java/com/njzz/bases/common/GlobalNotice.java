@@ -36,6 +36,6 @@ public class GlobalNotice {
     }
     //发送通知
     public static void Notice(int what,int arg1,int arg2,Object argObj){
-        gSignalGlobal.signal(what,arg1,arg2,argObj);
+        gSignalGlobal.signal(new MessageSet(what,arg1,arg2,argObj));
     }
 }

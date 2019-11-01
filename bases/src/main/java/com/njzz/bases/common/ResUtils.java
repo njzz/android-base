@@ -89,8 +89,9 @@ public class ResUtils {
             return null;
         }
 
-        if(PathUtil.isLocalFile(strUri)){//本地路径，直接返回
-            return strUri;
+        if(PathUtil.isLocalFile(strUri)){//本地路径
+            if( !isVideo(strUri) || resType!=ResType.IMG_VIDEO_THUMB )//如果不是根据本地视频来获取缩略图，直接返回
+                return strUri;
         }
 
         return getTypePath(resType)+getID(strUri,resType);

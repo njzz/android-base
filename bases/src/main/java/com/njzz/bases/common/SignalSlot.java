@@ -3,6 +3,9 @@ package com.njzz.bases.common;
 import android.app.Activity;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
+
+import com.njzz.bases.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -25,7 +28,7 @@ public class SignalSlot {
             return mCare== SysNotice.ANY||mCare==what;
         }
         //////////////////////////////////////
-        public abstract void onSignal(int what,int arg1,int agr2,Object argObj);
+        public abstract void onSignal(MessageSet ms);
     }
 
     //ui slot ，会在ui线程通知
@@ -88,49 +91,35 @@ public class SignalSlot {
         }
         /////////////////////////////////////////////
         //异步通知
-        public void signal_async(int what){
-            signal_async(what,0,0,null);
-        }
-        //异步通知
-        public void signal_async(int what,int arg1,int arg2,Object argObj){
-            new Thread(() -> signal(what,arg1,arg2,argObj)).start();
+        public void signal_async(MessageSet ms){
+            new Thread(() -> signal(ms)).start();
         }
 
-        //同步通知(UI依然会异步)
-        public void signal(int what){
-            signal(what,0,0,null);
-        }
-        //同步通知(UI通知依然会异步)
-        public void signal(int what,int arg1,int arg2,Object argObj){
-            if(what== SysNotice.ACTIVITY_DESTROY){//生命周期管理，自身不能从LifeBasedClass派生，不然不能初始化发布器
-                removeSlot((Activity) argObj);
+        //同步通知(UI接收器依然会异步)
+        public void signal(MessageSet ms){
+            if(ms.what== SysNotice.ACTIVITY_DESTROY){//生命周期管理，自身不能从LifeBasedClass派生，不然不能初始化发布器
+                removeSlot((Activity) ms.argObj);
             }
 
             List<Slot> notifys = copy();
             if (notifys != null) {
                 for (Slot slot : notifys) {//可以在正在进行的通知里，增加或者删除slot，不会有问题
-                    if (slot.isCare(what)) {
+                    if (slot.isCare(ms.what)) {
                         if (slot instanceof UISlot) {//ui notify
-                            final Slot ssn = slot;
-                            new Handler(Looper.getMainLooper(), message -> {
-                                if (message.what == 1) {
-                                    try {
-                                        ssn.onSignal(what, arg1, arg2, argObj);
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                                return true;
-                            }).sendEmptyMessage(1);
+                            Utils.UIRun(()->this.onSignal(slot,ms));
                         } else {
-                            try {
-                                slot.onSignal(what, arg1, arg2, argObj);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
+                            onSignal(slot,ms);
                         }
                     }
                 }
+            }
+        }
+
+        private void onSignal(Slot slot,MessageSet ms){
+            try {
+                slot.onSignal(ms);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 

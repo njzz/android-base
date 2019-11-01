@@ -14,21 +14,21 @@ public class HttpServer {
         void OnResult(int httpCode,String strResult);// 结果
     }
 
-    static private Notify.Receiver getNotify(Response response){
-            return new Notify.Receiver(null) {
+    static private Receiver getNotify(Response response){
+            return new Receiver(null) {
                 @Override
-                public void OnNotify(int arg1, int arg2, Object argObj) {
+                public void OnNotify(MessageSet ms) {
                 if(response!=null){
-                    if(arg1==ErrorCode.CONNECT){
+                    if(ms.what==ErrorCode.CONNECT){
                         response.OnConnectError();
                         String strExt="";
-                        if(argObj instanceof  String){
-                            strExt=(String)argObj;
+                        if(ms.argObj instanceof  String){
+                            strExt=(String)ms.argObj;
                         }
                         LogUtils.w( "Server Connect Error!" +strExt);
                     }else{
-                        LogUtils.d( Utils.jsonFormat( (String)argObj) );
-                        response.OnResult(arg1,(String)argObj);
+                        LogUtils.d( Utils.jsonFormat( (String)ms.argObj) );
+                        response.OnResult(ms.what,(String)ms.argObj);
                     }
                 }
             }

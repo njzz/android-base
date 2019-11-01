@@ -44,7 +44,7 @@ public class HttpRequests extends ResCompetition {
     }
 
     private static class DataU{
-        private DataU(String url, String method, Map<String,Object> params, Notify.Receiver nn){
+        private DataU(String url, String method, Map<String,Object> params, Receiver nn){
             strMethod=method;
             strUrl=url;
             this.params=params;
@@ -53,7 +53,7 @@ public class HttpRequests extends ResCompetition {
         String strMethod;
         String strUrl;
         Map<String,Object> params;
-        Notify.Receiver nn;
+        Receiver nn;
     }
     private boolean isGet(String strMethod){
         return strMethod!=null && strMethod.equals(HttpUtils.METHOD_GET);
@@ -63,10 +63,10 @@ public class HttpRequests extends ResCompetition {
         return strMethod!=null && strMethod.equals(HttpUtils.METHOD_POST);
     }
 
-    private Notify.Receiver mCallBack=new Notify.Receiver(null) {
+    private Receiver mCallBack=new Receiver(null) {
         @Override
-        public void OnNotify(int arg1, int arg2, Object argObj) {
-            DataU dataSet = (DataU) argObj;
+        public void OnNotify(MessageSet ms) {
+            DataU dataSet = (DataU) ms.argObj;
             OnRequest(dataSet);
         }
     };
@@ -124,7 +124,7 @@ public class HttpRequests extends ResCompetition {
             e.printStackTrace();
         }
 
-        Notify.Send(dateSet.nn,code,0,strData);
+        Notify.Send(dateSet.nn,new MessageSet(code,strData));
 
     }
 
@@ -145,17 +145,17 @@ public class HttpRequests extends ResCompetition {
     }
 
     //请求
-    public boolean Post(String url,Map<String,Object> params, Notify.Receiver nn) {//请求主页数据 ,type =1
+    public boolean Post(String url,Map<String,Object> params, Receiver nn) {//请求主页数据 ,type =1
         if (PathUtil.isHttpFile(url)) {
-            asyncCaller.AddTask(mCallBack, 0, 0, new DataU(url, HttpUtils.METHOD_POST,params,nn));
+            asyncCaller.AddTask(mCallBack,new MessageSet(0, new DataU(url, HttpUtils.METHOD_POST,params,nn)));
             return true;
         }
         return false;
     }
 
-    public boolean Get(String url,Map<String,Object> params, Notify.Receiver nn) {//请求数据
+    public boolean Get(String url,Map<String,Object> params, Receiver nn) {//请求数据
         if (PathUtil.isHttpFile(url)) {
-            asyncCaller.AddTask(mCallBack, 0, 0, new DataU(url,HttpUtils.METHOD_GET,params,nn));
+            asyncCaller.AddTask(mCallBack,new MessageSet( 0, new DataU(url,HttpUtils.METHOD_GET,params,nn)));
             return true;
         }
         return false;
