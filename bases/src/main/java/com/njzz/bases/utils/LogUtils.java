@@ -123,7 +123,7 @@ public class LogUtils {
     public static void msgStartTime(String msg) {
         mTimestamp = System.currentTimeMillis();
         if (!TextUtils.isEmpty(msg)) {
-            e("[Started：" + mTimestamp + "]" + msg);
+            e("[Started：" + mTimestamp + "] " + msg);
         }
     }
 
@@ -132,7 +132,7 @@ public class LogUtils {
         long currentTime = System.currentTimeMillis();
         long elapsedTime = currentTime - mTimestamp;
         mTimestamp = currentTime;
-        e("[Elapsed：" + elapsedTime + "]" + msg);
+        e("[Elapsed：" + elapsedTime + "] " + msg);
     }
 
     public static <T> void printList(List<T> list) {

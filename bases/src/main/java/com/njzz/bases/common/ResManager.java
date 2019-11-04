@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 
 import com.njzz.bases.utils.BitmapUtils;
 import com.njzz.bases.utils.LogUtils;
+import com.njzz.bases.utils.ResUtils;
 import com.njzz.bases.utils.Utils;
 
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ public class ResManager {
         };
 
         private List<Bitmap> getFromCache(String strUri){
-            String strCache=ResUtils.getDiskPath(strUri,ResUtils.ResType.IMG_VIDEO_THUMB);
+            String strCache= ResUtils.getDiskPath(strUri,ResUtils.ResType.IMG_VIDEO_THUMB);
             if(ResUtils.testFile(strCache)){//如果存在，直接加载缓存文件
                 return VideoViewCache.getFromCache(strCache);
             }
@@ -159,7 +160,7 @@ public class ResManager {
             if(strUri!=null){
                 String resPath = ResUtils.getDiskPath(strUri, ResUtils.ResType.IMAGE_CACHE);
                 if(ResUtils.testFile(resPath)){//该资源文件存在
-                    GlobalCache.set(strUri, BitmapUtils.bitmapFromFile(resPath) );
+                    GlobalCache.set(strUri, BitmapUtils.bitmapFromFile(resPath,true) );
                 }
             }
         }
@@ -174,7 +175,7 @@ public class ResManager {
     static public Bitmap getBitmapSrc(String strUri, Receiver nn){
         String resPath = ResUtils.getDiskPath(strUri, ResUtils.ResType.IMAGE_CACHE);
         if(ResUtils.testFile(resPath)){//该资源文件存在
-            return BitmapUtils.bitmapFromFile(resPath);
+            return BitmapUtils.bitmapFromFile(resPath,true);
         }
 
         HttpDownloader.add(strUri, resPath, nn);

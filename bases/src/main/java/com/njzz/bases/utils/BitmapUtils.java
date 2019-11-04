@@ -3,6 +3,7 @@ package com.njzz.bases.utils;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Size;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -25,17 +26,15 @@ public class BitmapUtils {
     }
 
     //从文件加载图片
-    public static Bitmap bitmapFromFile(String str) {
+    public static Bitmap bitmapFromFile(String str, Size size) {
         Bitmap bitmap = null;
         if (!Utils.emptystr(str)) {
-            //bmp = GlobalDataMap.get(str);
-            //if (bmp == null) {
-            //////////////////////////////////////////////////////////////////////
             try {
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inJustDecodeBounds = true; // 设置了此属性一定要记得将值设置为false
                 bitmap = BitmapFactory.decodeFile(str, options);
-                options.inSampleSize = caculateInSampleSize(options,540,540);//设置一个最大值
+                options.inSampleSize = caculateInSampleSize(options,size.getWidth(),size.getHeight());//
+
                 options.inPreferredConfig = Bitmap.Config.RGB_565;
                 /* 下面两个字段需要组合使用 */
                 options.inPurgeable = true;
@@ -51,12 +50,6 @@ public class BitmapUtils {
                 File ft=new File(str);
                 if(ft.exists()) ft.delete();
             }
-            ////////////////////////////////////////////////////////////////////////////
-
-            //bitmap = BitmapFactory.decodeFile(str);//获取bitmap
-
-            //GlobalDataMap.set(str, bmp);
-            //}
         }
         return bitmap;
     }

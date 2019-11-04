@@ -2,10 +2,12 @@ package com.njzz.bases.utils;
 
 import android.os.Environment;
 
+import com.njzz.bases.common.AppSet;
+
 import java.io.File;
 
 public class PathUtil {
-    private static final String PATH_ROOT =  Environment.getExternalStorageDirectory() + "/Android/data/com.librarys.tools";
+    private static final String PATH_ROOT =  Environment.getExternalStorageDirectory() + "/Android/data/" + AppSet.app().getPackageName();
 
     private static final String PATH_IMAGE = PATH_ROOT + "/download/images/";
     private static final String PATH_IMAGE_CACHE = PATH_ROOT + "/cache/images/";
@@ -22,7 +24,6 @@ public class PathUtil {
     public static final int VIDEO_CACHE=4;//视频缓存路径
 
     public static final int VIDEO_THUNB=5;//缩略视频路径
-
 
     public static String get(final int w){
         String pathReturn=null;

@@ -1,7 +1,4 @@
-package com.njzz.bases.common;
-
-import com.njzz.bases.utils.PathUtil;
-import com.njzz.bases.utils.Utils;
+package com.njzz.bases.utils;
 
 import java.io.File;
 
@@ -29,8 +26,8 @@ public class ResUtils {
             case IMAGE_CACHE://图片缓存
                 return EXT_IMAGE;
             case VIDEO://视频
-            case VIDEO_THUMB://视频缩略图
             case VIDEO_CACHE://视频缓存
+            case VIDEO_THUMB://缩略视频
                 return EXT_VIDEO;
             case IMG_VIDEO_THUMB://视频缩略图图片帧
                 return EXT_IMG_VIDEO_VIEW;
@@ -50,14 +47,14 @@ public class ResUtils {
             case IMAGE_CACHE://图片缓存
                 getID=PathUtil.IMAGE_CACHE;
                 break;
-            case VIDEO://视频缓存
+            case VIDEO://视频路径
                 getID=PathUtil.VIDEO;
                 break;
-            case VIDEO_CACHE:
+            case VIDEO_CACHE://视频缓存路径
                 getID=PathUtil.VIDEO_CACHE;
                 break;
-            case VIDEO_THUMB://视频缩略图缓存
-            case IMG_VIDEO_THUMB://视频缩略图图片帧缓存
+            case VIDEO_THUMB://缩略视频缓存
+            case IMG_VIDEO_THUMB://缩略视频图片帧缓存
                 getID=PathUtil.VIDEO_THUNB;
                 break;
                 default:

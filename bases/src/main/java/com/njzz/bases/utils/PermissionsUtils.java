@@ -1,5 +1,6 @@
 package com.njzz.bases.utils;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -8,12 +9,10 @@ import android.os.Build;
 import android.provider.Settings;
 import android.util.SparseArray;
 
-import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.PermissionChecker;
 
 import com.njzz.bases.common.AppSet;
-import com.njzz.bases.common.BaseActivity;
 
 public class PermissionsUtils {
 
@@ -48,12 +47,12 @@ public class PermissionsUtils {
     /**
      * 申请授权，当用户拒绝时，会显示默认一个默认的Dialog提示用户
      *
-     * @param context 上下文
+     * @param activity 上下文
      * @param listener 监听
      * @param permission 要申请的权限
      */
-    public  static void  request(BaseActivity context, String[] permission, Listener listener) {
-        ins().request(context,listener, permission);
+    public  static void  request(Activity activity, String[] permission, Listener listener) {
+        ins().request(activity,listener, permission);
     }
 
     /**
@@ -70,7 +69,7 @@ public class PermissionsUtils {
      * @param listener 监听回调
      * @param permission 需要申请授权的权限
      */
-    private  void request(BaseActivity activity, Listener listener, String[] permission) {
+    private  void request(Activity activity, Listener listener, String[] permission) {
 
         if (hasPermission(activity, permission)) {
             listener.permissionGranted(permission);//通过授权
