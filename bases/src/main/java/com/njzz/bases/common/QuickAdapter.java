@@ -42,6 +42,8 @@ public abstract class QuickAdapter<T> extends RecyclerView.Adapter<RecyclerView.
             if(itemViewType!=-1){
                 return itemViewType;
             }
+
+            position=mSpcialItem.getDataPos(mDatas.size(),position);
         }
         return getViewType(position);
     }
@@ -74,6 +76,9 @@ public abstract class QuickAdapter<T> extends RecyclerView.Adapter<RecyclerView.
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if(mSpcialItem==null || !mSpcialItem.isItemSpecial(mDatas.size(),position)){
+            if(mSpcialItem!=null){
+                position=mSpcialItem.getDataPos(mDatas.size(),position);
+            }
             VH h=(VH)holder;
             h.setCurPos(position);
             convert(h, mDatas.get(position));

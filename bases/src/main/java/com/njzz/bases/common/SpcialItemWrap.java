@@ -158,6 +158,16 @@ public class SpcialItemWrap {
     }
 
     /**
+     * 获得数据的pos
+     * @param pos
+     * @return
+     */
+    public int getDataPos(int realCount,int pos){
+        setRealItemCount(realCount);
+        return pos-getHeadersCount()-getEmptyCount();
+    }
+
+    /**
      * 获取item类型
      * @param realCount 真实数据数
      * @param position 位置

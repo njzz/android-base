@@ -350,30 +350,6 @@ public class Utils {
         return point;
     }
 
-    public static int mapInt(Map<String, Object> map, String key) {
-        if (map != null && key != null) {
-            Integer i = (Integer) map.get(key);
-            if (i != null) return i;
-        }
-        return 0;
-    }
-
-    public static boolean mapBool(Map<String, Object> map, String key) {
-        if (map != null && key != null) {
-            Boolean b = (Boolean) map.get(key);
-            if (b != null) return b;
-        }
-        return false;
-    }
-
-    public static String mapString(Map<String, Object> map, String key) {
-        if (map != null && key != null) {
-            String s = (String) map.get(key);
-            if (s != null) return s;
-        }
-        return "";
-    }
-
     //数字显示
     @SuppressLint("DefaultLocale")
     public static String NumShow(int num){

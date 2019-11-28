@@ -2,12 +2,12 @@ package com.njzz.bases.utils;
 
 import android.os.Environment;
 
-import com.njzz.bases.common.AppSet;
+import com.njzz.bases.common.BaseApplication;
 
 import java.io.File;
 
 public class PathUtil {
-    private static final String PATH_ROOT =  Environment.getExternalStorageDirectory() + "/Android/data/" + AppSet.app().getPackageName();
+    private static final String PATH_ROOT =  Environment.getExternalStorageDirectory() + "/Android/data/" + BaseApplication.app().getPackageName();
 
     private static final String PATH_IMAGE = PATH_ROOT + "/download/images/";
     private static final String PATH_IMAGE_CACHE = PATH_ROOT + "/cache/images/";

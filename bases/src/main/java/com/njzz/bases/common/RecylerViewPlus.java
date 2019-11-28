@@ -1,23 +1,24 @@
 package com.njzz.bases.common;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.RotateAnimation;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.njzz.bases.R;
 import com.njzz.bases.utils.DensityUtils;
 import com.njzz.bases.utils.LogUtils;
+import com.njzz.bases.utils.Utils;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -40,16 +41,15 @@ public class RecylerViewPlus extends RecyclerView {
     public static final int SET_REFRESH=1;
     public static final int SET_LOADMORE=2;
 
-    private float mLastY = -1; // save event y
+    private float mLastTouchY = -1; // save event y
     private int [] mStagSpinCount;//瀑布流显示获取最后的显示
     //头控件
     private RefreshHead mHeaderView;
     //尾控件
-    private RefreshFeet mFooterView;
+    private LoadMoreCtrl mFooterView;
     //adapter的装饰类
-    private SpcialItemWrap mHeaderAndFooterWrapper;
+    private SpcialItemWrap mSpcialItem;
 
-    PagerSnapHelper mSnapHelper;//整屏滚动
     private int mInProcessing=PROCESS_NONE,mEnableSet;
     private onRefreshListener mListener;
     private boolean mLoadmoreNotifyed;
@@ -72,43 +72,21 @@ public class RecylerViewPlus extends RecyclerView {
         init();
     }
 
-    public void setPageScroll(boolean bSet){
-        if(bSet) {
-            if(mSnapHelper==null) mSnapHelper=new PagerSnapHelper();
-            mSnapHelper.attachToRecyclerView(this);
-        }else{
-            if(mSnapHelper!=null){
-                mSnapHelper.attachToRecyclerView(null);
-                mSnapHelper=null;
-            }
-        }
-    }
-
-    public int getPagePos(){
-        if(mSnapHelper!=null) {
-            LayoutManager layoutManager = getLayoutManager();
-            if(layoutManager!=null) {
-                View snapView = mSnapHelper.findSnapView(layoutManager);
-                if(snapView!=null){
-                    return layoutManager.getPosition(snapView);
-                }
-            }
-        }
-        return -1;
-    }
-
     private void init() {
         Adapter adapter=getAdapter();
-        if(mHeaderAndFooterWrapper==null && adapter instanceof QuickAdapter) {
-            mHeaderAndFooterWrapper=new SpcialItemWrap();
-            ((QuickAdapter)adapter).setSpcial(mHeaderAndFooterWrapper);
+        if(mSpcialItem ==null && adapter instanceof QuickAdapter) {
+            mSpcialItem =((QuickAdapter) adapter).getSpcial();
+            if(mSpcialItem ==null) {
+                mSpcialItem = new SpcialItemWrap();
+                ((QuickAdapter) adapter).setSpcial(mSpcialItem);
+            }
             if ((mEnableSet & SET_REFRESH) != 0 && mHeaderView == null) {
                 //获取到头布局
                 mHeaderView = new RefreshHead(getContext());
             }
             if ((mEnableSet & SET_LOADMORE) != 0 && mFooterView == null) {
                 //获取尾布局
-                mFooterView = new RefreshFeet(getContext());
+                mFooterView = new LoadMoreCtrl(getContext());
             }
             //setClickable(true);
         }
@@ -137,29 +115,20 @@ public class RecylerViewPlus extends RecyclerView {
 //        return false;
 //    }
 
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-//        if(mInProcessing!=PROCESS_NONE)
-//            return true;
-        // onTouchEvent 经常收不到 ACTION_DOWN
-        if ( mListener !=null&& mHeaderAndFooterWrapper!=null && mInProcessing==PROCESS_NONE) {
+    private void testActionOnMove(MotionEvent ev){
+        if ( mListener !=null&& mSpcialItem !=null && mInProcessing==PROCESS_NONE ) {
             int action = ev.getAction();
-            if(action == MotionEvent.ACTION_DOWN ) {
-                mLastY = ev.getRawY();
-            }
-            else if(action == MotionEvent.ACTION_MOVE) {
+            if(action == MotionEvent.ACTION_MOVE) {
                 float yMove = ev.getRawY();
-                if (yMove - mLastY > 1) {//下拉
+                if (yMove - mLastTouchY > 1) {//下拉
                     if (isFreshSet() && isFirstAllVisable() && mListener.canRefresh() ) {
                         mInProcessing = PROCESS_PULL_REFRESH;
-                        return true;
                     }
-                }else if(yMove - mLastY < -1){//上拉
+                }else if(yMove - mLastTouchY < -1){//上拉
                     if ( isLoadmoreSet() && isLastAllVisable()) {
                         if (mListener.canLoadMore()) {//如果可以加载
                             mLoadmoreNotifyed=false;
                             mInProcessing = PROCESS_PULL_LOADMORE;
-                            return true;
                         } else if (mFooterView != null) {//支持loadmore，但没有更多，显示加载成功完成
                             mFooterView.showComplete(true);
                         }
@@ -167,83 +136,97 @@ public class RecylerViewPlus extends RecyclerView {
                 }
             }
         }
+    }
 
-        return super.onInterceptTouchEvent(ev);
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if( ev.getAction() == MotionEvent.ACTION_DOWN ) {
+            mLastTouchY = ev.getRawY();
+        }
+        super.onInterceptTouchEvent(ev);
+        return true;//总是处理
     }
 
 
     @Override
     public boolean onTouchEvent(MotionEvent e) {
-        if(mInProcessing!=PROCESS_NONE ) {
-            switch (e.getAction()) {
-                case MotionEvent.ACTION_MOVE:
-                    float moveY = e.getRawY();
-                    float distanceY = moveY - mLastY;
-                    if ( mInProcessing == PROCESS_PULL_REFRESH ) {
-                        //顶部显示下拉
-                        if(distanceY > 0) {//下滑过程中
-                            mHeaderView.showPulling(Math.round(distanceY));
-                            scrollToPosition(0);//显示第一个
-                            return true;
-                        }
+        switch (e.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                mLastTouchY = e.getRawY();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                testActionOnMove(e);
+                if(mInProcessing==PROCESS_NONE)
+                    break;
+                float moveY = e.getRawY();
+                float distanceY = moveY - mLastTouchY;
+                if (mInProcessing == PROCESS_PULL_REFRESH) {
+                    //顶部显示下拉
+                    if (distanceY > 0) {//下滑过程中
+                        mHeaderView.showPulling(Math.round(distanceY));
+                        scrollToPosition(0);//显示第一个
+                        return true;
+                    }
 
-                    } else if ( mInProcessing == PROCESS_PULL_LOADMORE ) {
-                        //底部直接刷新
-                        if(distanceY < 0) {
-                            mFooterView.showPulling(Math.round(distanceY));
-                            //mFooterView.showLoading();//直接是loading
-                            //mInProcessing = PROCESS_DO_WORKING;
-                            if(!mLoadmoreNotifyed) {
-                                mLoadmoreNotifyed=true;
-                                mListener.doLoadMore();//上拉直接开始加载更多
-                            }
-                            //scrollToPosition(mHeaderAndFooterWrapper.getItemCount()-1);//显示最后一项
-                            //return true;
+                } else if (mInProcessing == PROCESS_PULL_LOADMORE) {
+                    //底部直接刷新
+                    if (distanceY < 0) {
+                        mFooterView.showPulling(Math.round(distanceY));
+                        //mFooterView.showLoading();//直接是loading
+                        //mInProcessing = PROCESS_DO_WORKING;
+                        if (!mLoadmoreNotifyed) {
+                            mLoadmoreNotifyed = true;
+                            mListener.doLoadMore();//上拉直接开始加载更多
                         }
+                        //scrollToPosition(mSpcialItem.getItemCount()-1);//显示最后一项
+                        //return true;
                     }
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                if(mInProcessing==PROCESS_NONE)
                     break;
-                case MotionEvent.ACTION_UP:
-                    //LogUtils.i("touch up");
-                    if(mInProcessing==PROCESS_PULL_REFRESH){//顶部下拉，判断放开时状态
-                        if(mHeaderView.canDoworking()) {
-                            mHeaderView.showLoading();
-                            mInProcessing = PROCESS_DO_WORKING;
-                            mListener.doRefresh();
-                        }else{
-                            mHeaderView.hide();
-                            mInProcessing =  PROCESS_NONE;
-                            //bProcessed=false;
-                        }
-                    }else if( mInProcessing == PROCESS_PULL_LOADMORE){
-                        if(mFooterView.getShowHeight()>mFooterView.getSrcHeight()) {
-                            mInProcessing = PROCESS_DO_WORKING;//如果是加载更多，释放后设置为工作状态
-                        }
+                if (mInProcessing == PROCESS_PULL_REFRESH) {//顶部下拉，判断放开时状态
+                    if (mHeaderView.canDoworking()) {
+                        mHeaderView.showLoading();
+                        mInProcessing = PROCESS_DO_WORKING;
+                        mListener.doRefresh();
+                    } else {
+                        mHeaderView.hide();
+                        mInProcessing = PROCESS_NONE;
+                        //bProcessed=false;
                     }
-                    break;
-                default:
-                    break;
-            }
+                } else if (mInProcessing == PROCESS_PULL_LOADMORE) {
+                    if (mFooterView.getShowHeight() > mFooterView.getSrcHeight()) {
+                        mInProcessing = PROCESS_DO_WORKING;//如果是加载更多，释放后设置为工作状态
+                    }
+                }
+                break;
+            default:
+                break;
         }
         return super.onTouchEvent(e);
     }
 
     private boolean isFirstAllVisable(){
-        return !canScrollVertically(-1);
-//        RecyclerView.LayoutManager lm= getLayoutManager();
-//        if(lm!=null){
-//            if(lm instanceof LinearLayoutManager ){//GridLayoutManager 从 LinearLayoutManager 派生
-//                int posVAll= ((LinearLayoutManager)lm).findFirstCompletelyVisibleItemPosition();
-//                return posVAll<=1;//第0个是刷新
-//            }else if(lm instanceof StaggeredGridLayoutManager){
-//                if(mStagSpinCount==null){
-//                    mStagSpinCount=new int [((StaggeredGridLayoutManager) lm).getSpanCount()];
-//                }
-//                ((StaggeredGridLayoutManager)lm).findFirstCompletelyVisibleItemPositions(mStagSpinCount);
-//                int minShow = findMin(mStagSpinCount);
-//                return minShow<=1;
-//            }
-//        }
-//        return true;
+        //return !canScrollVertically(-1);
+        RecyclerView.LayoutManager lm= getLayoutManager();
+        if(lm!=null){
+            if(lm instanceof LinearLayoutManager){//GridLayoutManager 从 LinearLayoutManager 派生
+                int posVAll= ((LinearLayoutManager)lm).findFirstCompletelyVisibleItemPosition();
+                if(posVAll==-1) return false;
+                return posVAll<=1;//第0个是刷新
+            }else if(lm instanceof StaggeredGridLayoutManager){
+                if(mStagSpinCount==null){
+                    mStagSpinCount=new int [((StaggeredGridLayoutManager) lm).getSpanCount()];
+                }
+                ((StaggeredGridLayoutManager)lm).findFirstCompletelyVisibleItemPositions(mStagSpinCount);
+                int minShow = findMin(mStagSpinCount);
+                if(minShow==-1) return false;
+                return minShow<=1;
+            }
+        }
+        return true;
     }
 
     private int findMin(int[] lastPositions) {
@@ -256,27 +239,29 @@ public class RecylerViewPlus extends RecyclerView {
     }
 
     private boolean isLastAllVisable(){
-        return canScrollVertically(1);
-//        RecyclerView.LayoutManager lm= getLayoutManager();
-//        Adapter adapter=getAdapter();
-//        if(lm!=null && adapter!=null){
-//            int total=adapter.getItemCount();
-//            if(total>0) {
-//                if (lm instanceof LinearLayoutManager) {//GridLayoutManager 从 LinearLayoutManager 派生
-//                    //int posVAll = ((LinearLayoutManager) lm).findLastCompletelyVisibleItemPosition();
-//                    int posVAll=((LinearLayoutManager) lm).findLastVisibleItemPosition();
-//                    return posVAll >= total - 2;//最后一个是加载更多
-//                } else if (lm instanceof StaggeredGridLayoutManager) {
-//                    if (mStagSpinCount == null) {
-//                        mStagSpinCount = new int[((StaggeredGridLayoutManager) lm).getSpanCount()];
-//                    }
-//                    ((StaggeredGridLayoutManager) lm).findLastCompletelyVisibleItemPositions(mStagSpinCount);
-//                    int maxShow = findMax(mStagSpinCount);
-//                    return maxShow == total - 2;//最后是加载更多
-//                }
-//            }
-//        }
-//        return false;
+        //return canScrollVertically(1);
+        RecyclerView.LayoutManager lm= getLayoutManager();
+        Adapter adapter=getAdapter();
+        if(lm!=null && adapter!=null){
+            int total=adapter.getItemCount();
+            if(total>0) {
+                if (lm instanceof LinearLayoutManager) {//GridLayoutManager 从 LinearLayoutManager 派生
+                    int posVAll = ((LinearLayoutManager) lm).findLastCompletelyVisibleItemPosition();
+                    //int posVAll=((LinearLayoutManager) lm).findLastVisibleItemPosition();
+                    if(posVAll==-1) return false;
+                    return posVAll >= total - 2;//最后一个是加载更多
+                } else if (lm instanceof StaggeredGridLayoutManager) {
+                    if (mStagSpinCount == null) {
+                        mStagSpinCount = new int[((StaggeredGridLayoutManager) lm).getSpanCount()];
+                    }
+                    ((StaggeredGridLayoutManager) lm).findLastCompletelyVisibleItemPositions(mStagSpinCount);
+                    int maxShow = findMax(mStagSpinCount);
+                    if(maxShow==-1) return false;
+                    return maxShow == total - 2;//最后是加载更多
+                }
+            }
+        }
+        return false;
     }
 
     private int findMax(int[] lastPositions) {
@@ -328,9 +313,12 @@ public class RecylerViewPlus extends RecyclerView {
 
 
     private class RefreshCtrl {
+        static final String TEXT_LOADING="加载中…";
+        static final String TEXT_LOADCOMPLATED="加载完成";
+        static final String TEXT_LOADFAILED="加载失败";
         ProgressBar mPBar;
-        TextView mTextLoading;
-        TextView mTextResult;
+        TextView mTextShow;
+        ImageView mImageShow;
         View vRootSet;
         int mViewHeight;
         boolean mShowed;
@@ -341,9 +329,9 @@ public class RecylerViewPlus extends RecyclerView {
             v.setLayoutParams(lp);
             mViewHeight=DensityUtils.dp2px(context,25f);
 
-            mPBar = v.findViewById(R.id.item_footer_progress);
-            mTextLoading = v.findViewById(R.id.item_footer_message);
-            mTextResult = v.findViewById(R.id.item_footer_complete);
+            mPBar = v.findViewById(R.id.item_refresh_progress);
+            mImageShow = v.findViewById(R.id.item_refresh_image);
+            mTextShow = v.findViewById(R.id.item_refresh_message);
             vRootSet=v;
         }
 
@@ -356,7 +344,7 @@ public class RecylerViewPlus extends RecyclerView {
         int getSrcHeight(){
             return mViewHeight;
         }
-        int getMaxHeight() {return mViewHeight*2;}
+        int getMaxHeight() {return mViewHeight*4;}
 
         int getShowHeight(){
             RecyclerView.LayoutParams mLp=(RecyclerView.LayoutParams) vRootSet.getLayoutParams();
@@ -366,21 +354,28 @@ public class RecylerViewPlus extends RecyclerView {
             return 0;
         }
 
-        protected void attach(boolean bHead){
-            if (bHead)
-                mHeaderAndFooterWrapper.setFirstView(vRootSet);
-            else
-                mHeaderAndFooterWrapper.setLastView(vRootSet);
-            getAdapter().notifyDataSetChanged();
+        void attach(boolean bHead){
+            if (bHead) {
+                mSpcialItem.setFirstView(vRootSet);
+            }
+            else {
+                mSpcialItem.setLastView(vRootSet);
+            }
+
+            Adapter adapter = getAdapter();
+            if(adapter!=null)
+                adapter.notifyDataSetChanged();
         }
 
-        protected void detach(boolean bHead){
-            if(bHead)
-                mHeaderAndFooterWrapper.removeHeadView(vRootSet,true);
-            else
-                mHeaderAndFooterWrapper.removeFootView(vRootSet,true);
-            getAdapter().notifyDataSetChanged();
-        }
+//        protected void detach(boolean bHead){
+//            if(bHead)
+//                mSpcialItem.removeHeadView(vRootSet,true);
+//            else
+//                mSpcialItem.removeFootView(vRootSet,true);
+//            Adapter adapter = getAdapter();
+//            if(adapter!=null)
+//                adapter.notifyDataSetChanged();
+//        }
 
         void showPulling(int offset){
             mShowed=true;
@@ -394,12 +389,10 @@ public class RecylerViewPlus extends RecyclerView {
             if(getShowHeight()<getSrcHeight()){
                 setHeight(getSrcHeight());
             }
-            if(mPBar.getVisibility()!=VISIBLE){
-                mPBar.setVisibility(VISIBLE);
-                mTextLoading.setVisibility(VISIBLE);
-                mTextResult.setVisibility(GONE);
-            }
-            mTextLoading.setText("加载中…");
+            mImageShow.clearAnimation();
+            mImageShow.setVisibility(GONE);
+            mPBar.setVisibility(VISIBLE);
+            mTextShow.setText(TEXT_LOADING);
         }
 
         void showComplete(boolean bSuccessed){
@@ -407,20 +400,18 @@ public class RecylerViewPlus extends RecyclerView {
             if(getShowHeight()<getSrcHeight()){
                 setHeight(getSrcHeight());
             }
-            if(mPBar.getVisibility()!=GONE){
-                mPBar.setVisibility(GONE);
-                mTextLoading.setVisibility(GONE);
-                mTextResult.setVisibility(VISIBLE);
-            }
-            mTextResult.setText(bSuccessed?"加载完成":"加载失败");
+            mPBar.setVisibility(GONE);
+            mImageShow.clearAnimation();
+            mImageShow.setVisibility(GONE);
+            mTextShow.setText(bSuccessed?TEXT_LOADCOMPLATED:TEXT_LOADFAILED);
 
-            vRootSet.postDelayed(this::hide,1000);
+            Utils.UIRun(this::hide,500);
         }
 
         void hide(){
             mInProcessing=PROCESS_NONE;
             mShowed=false;
-            setHeight(5);
+            setHeight(0);
         }
 
         void setHeight(int height){
@@ -431,7 +422,7 @@ public class RecylerViewPlus extends RecyclerView {
                 //vRootSet.requestLayout();
                 vRootSet.setLayoutParams(lpSet);
 
-                mCanDoWorking=height>getSrcHeight()+getSrcHeight()/2;
+                mCanDoWorking=height>getSrcHeight()+getMaxHeight()/3;
 
             }
         }
@@ -453,28 +444,26 @@ public class RecylerViewPlus extends RecyclerView {
 //        }
     }
 
-    private class RefreshFeet extends RefreshCtrl{
-        RefreshFeet(Context context){
+    private class LoadMoreCtrl extends RefreshCtrl{
+        LoadMoreCtrl(Context context){
             super(context);
             attach(false);
             hide();
         }
 
         @Override
-        void showPulling(int offset){//只有下拉才有
-            if (mPBar.getVisibility() != VISIBLE) {
-                mPBar.setVisibility(VISIBLE);
-                mTextLoading.setVisibility(VISIBLE);
-                mTextResult.setVisibility(GONE);
-            }
-            mTextLoading.setText("加载中…");
+        void showPulling(int offset){//只有上滑才有
+            mPBar.setVisibility(VISIBLE);
+            mImageShow.setVisibility(GONE);
+            mTextShow.setText(TEXT_LOADING);
             super.showPulling(offset);
         }
     }
 
 
     private class RefreshHead extends RefreshCtrl {
-
+        static final String TEXT_PULL_REFRESH="下拉刷新";
+        static final String TEXT_RELEASE_REFRESH="释放刷新";
         RefreshHead(Context context){
             super(context);
             attach(true);
@@ -485,12 +474,37 @@ public class RecylerViewPlus extends RecyclerView {
         void showPulling(int offset){//只有下拉才有
             if (mPBar.getVisibility() != GONE) {
                 mPBar.setVisibility(GONE);
-                mTextLoading.setVisibility(GONE);
-                mTextResult.setVisibility(VISIBLE);
             }
 
+            mImageShow.setVisibility(VISIBLE);
+
+            boolean lastState=canDoworking();
+
             super.showPulling(offset);
-            mTextResult.setText(canDoworking()?"释放刷新":"下拉刷新");
+            mTextShow.setText(canDoworking()?TEXT_RELEASE_REFRESH:TEXT_PULL_REFRESH);
+            if(lastState!=canDoworking()) {
+                rotateArrow();
+            }
+        }
+
+        /**
+         * 根据当前的状态来旋转箭头。
+         */
+        private void rotateArrow() {
+            float pivotX = mImageShow.getWidth() / 2f;
+            float pivotY = mImageShow.getHeight() / 2f;
+            float fromDegrees,toDegrees;
+            if (canDoworking()) {
+                fromDegrees = 0f;
+                toDegrees = 180f;
+            }else {
+                fromDegrees = 180f;
+                toDegrees = 360f;
+            }
+            RotateAnimation animation = new RotateAnimation(fromDegrees, toDegrees, pivotX, pivotY);
+            animation.setDuration(200);
+            animation.setFillAfter(true);
+            mImageShow.startAnimation(animation);
         }
     }
 
@@ -500,7 +514,7 @@ public class RecylerViewPlus extends RecyclerView {
 //        public void onChanged() {
 //            //Adapter<?> adapter = getAdapter(); //这种写发跟之前我们之前看到的ListView的是一样的，判断数据为空否，再进行显示或者隐藏
 //            if ( mEmptyView != null) {
-//                if (mHeaderAndFooterWrapper.getRealItemCount() == 0) {
+//                if (mSpcialItem.getRealItemCount() == 0) {
 //                    mEmptyView.setVisibility(View.VISIBLE);
 //                    RecylerViewPlus.this.setVisibility(View.GONE);
 //                } else {

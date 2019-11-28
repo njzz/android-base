@@ -14,7 +14,7 @@ import androidx.annotation.Nullable;
 
 import com.njzz.bases.utils.LogUtils;
 
-public class AppSet extends Application {
+public class BaseApplication extends Application {
     private static Application application;
     static public Application app(){ return application;}
     @Override

@@ -12,7 +12,7 @@ import android.util.SparseArray;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.PermissionChecker;
 
-import com.njzz.bases.common.AppSet;
+import com.njzz.bases.common.BaseApplication;
 
 public class PermissionsUtils {
 
@@ -152,9 +152,9 @@ public class PermissionsUtils {
      */
     private  void gotoSetting() {
         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-        intent.setData(Uri.parse("package:" + AppSet.app().getPackageName()));
+        intent.setData(Uri.parse("package:" + BaseApplication.app().getPackageName()));
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        AppSet.app().startActivity(intent);
+        BaseApplication.app().startActivity(intent);
     }
 
 }

@@ -3,7 +3,11 @@ package com.njzz.bases.utils;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.util.Size;
+
+import com.njzz.bases.common.ActManager;
+import com.njzz.bases.common.BaseApplication;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -26,14 +30,28 @@ public class BitmapUtils {
     }
 
     //从文件加载图片
+    private static Size g_szScreen=null;
     public static Bitmap bitmapFromFile(String str, Size size) {
         Bitmap bitmap = null;
         if (!Utils.emptystr(str)) {
+            Size szSet=size;
+            if(szSet==null){
+                if(g_szScreen==null) {
+                    synchronized ( BitmapUtils.class ) {
+                        if(g_szScreen==null) {
+                            Point pt = Utils.getScreenSize(ActManager.ins().last());
+                            g_szScreen = new Size(pt.x, pt.y);
+                        }
+                    }
+                }
+
+                szSet=g_szScreen;
+            }
             try {
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inJustDecodeBounds = true; // 设置了此属性一定要记得将值设置为false
                 bitmap = BitmapFactory.decodeFile(str, options);
-                options.inSampleSize = caculateInSampleSize(options,size.getWidth(),size.getHeight());//
+                options.inSampleSize = caculateInSampleSize(options,szSet.getWidth(),szSet.getHeight());//
 
                 options.inPreferredConfig = Bitmap.Config.RGB_565;
                 /* 下面两个字段需要组合使用 */

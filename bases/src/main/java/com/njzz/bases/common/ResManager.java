@@ -2,6 +2,7 @@ package com.njzz.bases.common;
 
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
+import android.util.Size;
 
 import com.njzz.bases.utils.BitmapUtils;
 import com.njzz.bases.utils.LogUtils;
@@ -160,7 +161,7 @@ public class ResManager {
             if(strUri!=null){
                 String resPath = ResUtils.getDiskPath(strUri, ResUtils.ResType.IMAGE_CACHE);
                 if(ResUtils.testFile(resPath)){//该资源文件存在
-                    GlobalCache.set(strUri, BitmapUtils.bitmapFromFile(resPath,true) );
+                    GlobalCache.set(strUri, BitmapUtils.bitmapFromFile(resPath,null) );
                 }
             }
         }

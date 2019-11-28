@@ -14,7 +14,7 @@ public class HttpServer {
         void OnResult(int httpCode,String strResult);// 结果
     }
 
-    static private Receiver getNotify(Response response){
+    static private Receiver getBindNotify(Response response){
             return new Receiver(null) {
                 @Override
                 public void OnNotify(MessageSet ms) {
@@ -25,7 +25,7 @@ public class HttpServer {
                         if(ms.argObj instanceof  String){
                             strExt=(String)ms.argObj;
                         }
-                        LogUtils.w( "Server Connect Error!" +strExt);
+                        LogUtils.w( "Server Connect Error:" +strExt);
                     }else{
                         LogUtils.d( Utils.jsonFormat( (String)ms.argObj) );
                         response.OnResult(ms.what,(String)ms.argObj);
@@ -49,10 +49,10 @@ public class HttpServer {
 
     //发起get请求
     public static void Get(String strUri, Map<String,Object > param,final Response response){
-        mHttpRequestor.Get(mServerUrl+strUri, param, getNotify(response));
+        mHttpRequestor.Get(mServerUrl+strUri, param, getBindNotify(response));
     }
     //发起post请求
     public static void Post(String strUri, Map<String,Object > param,final Response response){
-        mHttpRequestor.Post(mServerUrl+strUri, param, getNotify(response));
+        mHttpRequestor.Post(mServerUrl+strUri, param, getBindNotify(response));
     }
 }
