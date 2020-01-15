@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".design.impl.view.MainActivity">
+
+
+    <LinearLayout
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:gravity="center"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="!GO!"
+        android:onClick="onNewAct"
+        android:layout_gravity="center"
+         />
+
+        <Button
+            android:id="@+id/dial"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="拨号盘"
+            android:onClick="onDial"
+            android:layout_gravity="center"
+            />
+
+        <Button
+            android:id="@+id/content_user"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="联系人"
+            android:onClick="onContentUser"
+            android:layout_gravity="center"
+            />
+
+        <Button
+            android:id="@+id/server_test"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="打开服务"
+            android:onClick="onStartServer"
+            android:layout_gravity="center"
+            />
+
+        <Button
+            android:id="@+id/white_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="启动白名单"
+            android:onClick="onWhiteList"
+            android:layout_gravity="center"
+            />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="耗电白名单"
+            android:onClick="onWhiteList2"
+            android:layout_gravity="center"
+            />
+
+        <Button
+            android:id="@+id/keep_alive_s"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="保活服务"
+            android:onClick="onKeepAlive"
+            android:layout_gravity="center"
+            />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
